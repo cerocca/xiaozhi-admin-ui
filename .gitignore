@@ -16,3 +16,6 @@ data/backups/config/*
 
 # OS
 .DS_Store
+
+.DS_Store
+._*
