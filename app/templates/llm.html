@@ -4,37 +4,53 @@
 <section class="card">
   <h2>LLM Configuration</h2>
 
+  {% set current_provider = active_provider or provider or "non disponibile" %}
+  {% set current_module_name = active_selected_module_name or selected_module_name or "profilo non disponibile" %}
+  {% set current_model = active_model or model or "model non disponibile" %}
+
   <div class="card" style="margin-bottom: 16px;">
     <strong>Stato attuale</strong><br>
-    Provider attivo: <strong>{{ provider }}</strong><br>
-    Modulo attivo:
-    {% if selected_module_name %}
-      <code>{{ selected_module_name }}</code>
-    {% else %}
-      <span class="badge err">non impostato</span>
-    {% endif %}<br>
-    Model attivo: <strong>{{ model }}</strong>
+    <div style="margin-top: 8px;">Provider attivo: <strong>{{ current_provider }}</strong></div>
+    <div style="margin-top: 6px;">
+      Modulo attivo:
+      {% if active_selected_module_name or selected_module_name %}
+        <code>{{ current_module_name }}</code>
+      {% else %}
+        <span class="muted">{{ current_module_name }}</span>
+      {% endif %}
+    </div>
+    <div style="margin-top: 6px;">Model attivo: <strong>{{ current_model }}</strong></div>
   </div>
 
   {% if result %}
     <div class="flash {% if result.ok %}flash-ok{% else %}flash-err{% endif %}">
-      {{ result.message }}
+      <div>
+        <strong>
+          {% if result.ok %}Configurazione aggiornata{% else %}Aggiornamento non completato{% endif %}
+        </strong>
+      </div>
+      {% if result.message %}
+        <div style="margin-top: 6px;">{{ result.message }}</div>
+      {% endif %}
       {% if result.backup_path %}
-        <div>Backup: {{ result.backup_path }}</div>
+        <div style="margin-top: 8px;">Backup salvato in: <code>{{ result.backup_path }}</code></div>
       {% endif %}
       {% if result.selected_module_name %}
-        <div>Modulo attivo: {{ result.selected_module_name }}</div>
+        <div style="margin-top: 6px;">Modulo attivo: <code>{{ result.selected_module_name }}</code></div>
       {% endif %}
       {% if result.active_model %}
-        <div>Model attivo: {{ result.active_model }}</div>
+        <div style="margin-top: 6px;">Model attivo: <strong>{{ result.active_model }}</strong></div>
       {% endif %}
       {% if result.restart_result %}
-        <div>
+        <div style="margin-top: 8px;">
           Restart Xiaozhi:
           {% if result.restart_result.ok %}
             <span class="badge ok">OK</span>
           {% else %}
             <span class="badge err">ERRORE</span>
+          {% endif %}
+          {% if result.restart_result.message %}
+            <div class="muted" style="margin-top: 6px;">{{ result.restart_result.message }}</div>
           {% endif %}
         </div>
       {% endif %}
@@ -44,7 +60,7 @@
   <form method="post" action="/llm/save" id="llm-form">
     <div class="card" style="margin-bottom: 16px;">
       <strong>Comportamento della pagina</strong><br>
-      - Cambiare provider aggiorna model e base_url<br>
+      - Cambiare provider aggiorna model, base_url e temperature usando i preset disponibili<br>
       - La API key non viene mostrata<br>
       - Lascia vuoto il campo API key per mantenerla invariata
     </div>
@@ -53,11 +69,18 @@
       <div>
         <label for="provider">Provider</label>
         <select id="provider" name="provider">
-          <option value="groq" {% if provider == "groq" %}selected{% endif %}>Groq</option>
-          <option value="openai" {% if provider == "openai" %}selected{% endif %}>OpenAI</option>
-          <option value="ollama" {% if provider == "ollama" %}selected{% endif %}>Ollama</option>
-          <option value="anthropic" {% if provider == "anthropic" %}selected{% endif %}>Anthropic</option>
+          {% for provider_name in presets.keys() %}
+            <option value="{{ provider_name }}" {% if provider == provider_name %}selected{% endif %}>
+              {{ provider_name|capitalize }}
+            </option>
+          {% endfor %}
+          {% if provider and provider not in presets %}
+            <option value="{{ provider }}" selected>{{ provider }}</option>
+          {% endif %}
         </select>
+        <div class="muted" style="margin-top: 6px;">
+          Scegli il provider attivo. Se esiste un preset, la pagina propone valori coerenti per i campi sotto.
+        </div>
       </div>
 
       <div>
@@ -65,16 +88,25 @@
         <select id="model_preset">
           <option value="">-- scegli preset --</option>
         </select>
+        <div class="muted" style="margin-top: 6px;">
+          Opzionale: seleziona un model suggerito dal provider senza perdere la possibilita di inserire un valore custom.
+        </div>
       </div>
 
       <div class="full">
         <label for="model">Model</label>
-        <input type="text" id="model" name="model" value="{{ model }}" required>
+        <input type="text" id="model" name="model" value="{{ model }}" required autocomplete="off">
+        <div class="muted" style="margin-top: 6px;">
+          Campo obbligatorio. Puoi lasciare il model corrente o inserirne uno custom supportato dal backend.
+        </div>
       </div>
 
       <div class="full">
         <label for="base_url">Base URL</label>
-        <input type="text" id="base_url" name="base_url" value="{{ base_url }}" required>
+        <input type="text" id="base_url" name="base_url" value="{{ base_url }}" required autocomplete="off">
+        <div class="muted" style="margin-top: 6px;">
+          Endpoint API del provider. Puoi usare anche URL non standard se il backend li supporta.
+        </div>
       </div>
 
       <div class="full">
@@ -87,13 +119,16 @@
           placeholder="Lascia vuoto per mantenere la chiave attuale"
         >
         <div class="muted" style="margin-top: 6px;">
-          🔒 La chiave NON viene mostrata. Lascia vuoto per non modificarla.
+          <strong>Importante:</strong> la chiave attuale non viene mostrata. Se lasci il campo vuoto, la UI non la modifica.
         </div>
       </div>
 
       <div>
         <label for="temperature">Temperature</label>
         <input type="number" id="temperature" name="temperature" value="{{ temperature }}" step="0.1" min="0" max="2">
+        <div class="muted" style="margin-top: 6px;">
+          Valore consigliato tra 0.0 e 2.0. Cambiando provider viene proposto il valore di default del preset, se disponibile.
+        </div>
       </div>
     </div>
 
@@ -103,6 +138,10 @@
         Salva + restart Xiaozhi
       </button>
       <a class="button-link" href="/logs?source=xserver&lines=200">Vedi log Xiaozhi</a>
+    </div>
+    <div class="muted" style="margin-top: 10px;">
+      <strong>Salva</strong> aggiorna solo la configurazione.
+      <strong>Salva + restart</strong> aggiorna la configurazione e prova subito a riavviare Xiaozhi.
     </div>
   </form>
 
@@ -120,12 +159,20 @@
   const modelInput = document.getElementById("model");
   const baseUrlInput = document.getElementById("base_url");
   const temperatureInput = document.getElementById("temperature");
+  const initialModelValue = modelInput.value;
+  const initialBaseUrlValue = baseUrlInput.value;
+  const initialTemperatureValue = temperatureInput.value;
+
+  function getPreset(provider) {
+    return presets[provider] || null;
+  }
 
   function fillModelPresetOptions(provider, currentModel = "") {
-    const preset = presets[provider];
+    const preset = getPreset(provider);
     modelPresetInput.innerHTML = '<option value="">-- scegli preset --</option>';
+    modelPresetInput.disabled = true;
 
-    if (!preset || !preset.models) return;
+    if (!preset || !Array.isArray(preset.models) || preset.models.length === 0) return;
 
     for (const modelName of preset.models) {
       const opt = document.createElement("option");
@@ -136,17 +183,34 @@
       }
       modelPresetInput.appendChild(opt);
     }
+
+    modelPresetInput.disabled = false;
   }
 
-  function applyProviderPreset(provider) {
-    const preset = presets[provider];
+  function applyProviderPreset(provider, options = {}) {
+    const preset = getPreset(provider);
+    const shouldPreserveModel = Boolean(options.preserveModel);
+    const shouldPreserveBaseUrl = Boolean(options.preserveBaseUrl);
+    const shouldPreserveTemperature = Boolean(options.preserveTemperature);
+    const currentModel = modelInput.value;
+    const currentBaseUrl = baseUrlInput.value;
+    const currentTemperature = temperatureInput.value;
+
+    fillModelPresetOptions(provider, currentModel);
+
     if (!preset) return;
 
-    modelInput.value = preset.default_model || "";
-    baseUrlInput.value = preset.base_url || "";
-    temperatureInput.value = preset.default_temperature ?? 0.7;
+    if (!shouldPreserveModel || !currentModel) {
+      modelInput.value = preset.default_model || "";
+    }
+    if (!shouldPreserveBaseUrl || !currentBaseUrl) {
+      baseUrlInput.value = preset.base_url || "";
+    }
+    if (!shouldPreserveTemperature || !currentTemperature) {
+      temperatureInput.value = preset.default_temperature ?? currentTemperature ?? 0.7;
+    }
 
-    fillModelPresetOptions(provider, preset.default_model || "");
+    fillModelPresetOptions(provider, modelInput.value);
   }
 
   providerInput.addEventListener("change", function () {
@@ -159,6 +223,10 @@
     }
   });
 
-  fillModelPresetOptions(providerInput.value, modelInput.value);
+  applyProviderPreset(providerInput.value, {
+    preserveModel: Boolean(initialModelValue),
+    preserveBaseUrl: Boolean(initialBaseUrlValue),
+    preserveTemperature: Boolean(initialTemperatureValue),
+  });
 </script>
 {% endblock %}

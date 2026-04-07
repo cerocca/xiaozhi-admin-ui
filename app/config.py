@@ -7,8 +7,8 @@ class Settings(BaseSettings):
     admin_ui_host: str = "192.168.1.69"
     admin_ui_port: int = 8088
 
-    xiaozhi_dir: str = "/home/ciru/xiaozhi-esp32-server"
-    xiaozhi_config: str = "/home/ciru/xiaozhi-esp32-server/data/.config.yaml"
+    xiaozhi_dir: str = "/home/ciru/xiaozhi-esp32-lightserver"
+    xiaozhi_config: str = "/home/ciru/xiaozhi-esp32-lightserver/data/.config.yaml"
 
     piper_health_url: str = "http://127.0.0.1:8091/health"
     piper_systemd_service: str = "piper-api"

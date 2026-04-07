@@ -6,7 +6,13 @@
 
   {% if result %}
     <div class="flash {% if result.ok %}flash-ok{% else %}flash-err{% endif %}">
-      {{ result.message }}
+      <div>{{ result.message }}</div>
+      {% if result.restored_from %}
+        <div style="margin-top: 6px;">Ripristinato da: <code>{{ result.restored_from }}</code></div>
+      {% endif %}
+      {% if result.pre_restore_backup %}
+        <div style="margin-top: 6px;">Backup pre-restore: <code>{{ result.pre_restore_backup }}</code></div>
+      {% endif %}
     </div>
   {% endif %}
 
@@ -25,16 +31,24 @@
     </thead>
     <tbody>
       {% for b in backups %}
+      {% set backup_name = b.name if b is mapping else b %}
       <tr>
-        <td><code>{{ b }}</code></td>
+        <td>
+          <code>{{ backup_name }}</code>
+          {% if b is mapping %}
+            <div class="muted" style="margin-top: 6px;">
+              {{ b.mtime }} · {{ b.sha256_short }}
+            </div>
+          {% endif %}
+        </td>
         <td style="display:flex; gap:8px; flex-wrap:wrap;">
           <form method="post" action="/backups/restore" style="display:inline;" onsubmit="return confirm('Ripristinare questo backup?')">
-            <input type="hidden" name="filename" value="{{ b }}">
+            <input type="hidden" name="filename" value="{{ backup_name }}">
             <button type="submit">♻️ Restore</button>
           </form>
 
           <form method="post" action="/backups/delete" style="display:inline;" onsubmit="return confirm('Eliminare questo backup?')">
-            <input type="hidden" name="filename" value="{{ b }}">
+            <input type="hidden" name="filename" value="{{ backup_name }}">
             <button type="submit">🗑 Delete</button>
           </form>
         </td>
