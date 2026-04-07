@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="grid">
+  <article class="card">
+    <h2>Server Xiaozhi</h2>
+    <p><strong>Healthy:</strong> {{ status.xiaozhi.healthy }}</p>
+    <p><strong>Summary:</strong> {{ status.xiaozhi.summary }}</p>
+    <pre>{{ status.xiaozhi.details }}</pre>
+
+    <form method="post" action="/actions/xserver/restart" class="actions"
+          onsubmit="return confirm('Riavviare il server Xiaozhi?');">
+      <button type="submit">Restart Xiaozhi</button>
+      <a class="button-link" href="/logs?source=xserver&lines=200">Vedi log</a>
+    </form>
+  </article>
+
+  <article class="card">
+    <h2>Piper API</h2>
+    <p><strong>Healthy:</strong> {{ status.piper.healthy }}</p>
+    <p><strong>Summary:</strong> {{ status.piper.summary }}</p>
+    <pre>{{ status.piper.details }}</pre>
+
+    <form method="post" action="/actions/piper/restart" class="actions"
+          onsubmit="return confirm('Riavviare Piper API?');">
+      <button type="submit">Restart Piper</button>
+      <a class="button-link" href="/logs?source=piper&lines=200">Vedi log</a>
+    </form>
+  </article>
+
+  <article class="card">
+    <h2>Config runtime</h2>
+    <p><strong>Healthy:</strong> {{ status.config.healthy }}</p>
+    <p><strong>Path:</strong> {{ status.config.summary }}</p>
+    <pre>{{ status.config.details }}</pre>
+
+    <div class="actions">
+      <a class="button-link" href="/config">Apri config</a>
+      <a class="button-link" href="/backups">Apri backups</a>
+    </div>
+  </article>
+</section>
+{% endblock %}

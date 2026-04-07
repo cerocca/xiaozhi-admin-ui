@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h2>LLM Configuration</h2>
+
+  <div class="card" style="margin-bottom: 16px;">
+    <strong>Stato attuale</strong><br>
+    Provider attivo: <strong>{{ provider }}</strong><br>
+    Modulo attivo:
+    {% if selected_module_name %}
+      <code>{{ selected_module_name }}</code>
+    {% else %}
+      <span class="badge err">non impostato</span>
+    {% endif %}<br>
+    Model attivo: <strong>{{ model }}</strong>
+  </div>
+
+  {% if result %}
+    <div class="flash {% if result.ok %}flash-ok{% else %}flash-err{% endif %}">
+      {{ result.message }}
+      {% if result.backup_path %}
+        <div>Backup: {{ result.backup_path }}</div>
+      {% endif %}
+      {% if result.selected_module_name %}
+        <div>Modulo attivo: {{ result.selected_module_name }}</div>
+      {% endif %}
+      {% if result.active_model %}
+        <div>Model attivo: {{ result.active_model }}</div>
+      {% endif %}
+      {% if result.restart_result %}
+        <div>
+          Restart Xiaozhi:
+          {% if result.restart_result.ok %}
+            <span class="badge ok">OK</span>
+          {% else %}
+            <span class="badge err">ERRORE</span>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <form method="post" action="/llm/save" id="llm-form">
+    <div class="card" style="margin-bottom: 16px;">
+      <strong>Comportamento della pagina</strong><br>
+      - Cambiare provider aggiorna model e base_url<br>
+      - La API key non viene mostrata<br>
+      - Lascia vuoto il campo API key per mantenerla invariata
+    </div>
+
+    <div class="form-grid">
+      <div>
+        <label for="provider">Provider</label>
+        <select id="provider" name="provider">
+          <option value="groq" {% if provider == "groq" %}selected{% endif %}>Groq</option>
+          <option value="openai" {% if provider == "openai" %}selected{% endif %}>OpenAI</option>
+          <option value="ollama" {% if provider == "ollama" %}selected{% endif %}>Ollama</option>
+          <option value="anthropic" {% if provider == "anthropic" %}selected{% endif %}>Anthropic</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="model_preset">Model preset</label>
+        <select id="model_preset">
+          <option value="">-- scegli preset --</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label for="model">Model</label>
+        <input type="text" id="model" name="model" value="{{ model }}" required>
+      </div>
+
+      <div class="full">
+        <label for="base_url">Base URL</label>
+        <input type="text" id="base_url" name="base_url" value="{{ base_url }}" required>
+      </div>
+
+      <div class="full">
+        <label for="api_key">API Key</label>
+        <input
+          type="password"
+          id="api_key"
+          name="api_key"
+          value=""
+          placeholder="Lascia vuoto per mantenere la chiave attuale"
+        >
+        <div class="muted" style="margin-top: 6px;">
+          🔒 La chiave NON viene mostrata. Lascia vuoto per non modificarla.
+        </div>
+      </div>
+
+      <div>
+        <label for="temperature">Temperature</label>
+        <input type="number" id="temperature" name="temperature" value="{{ temperature }}" step="0.1" min="0" max="2">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit">Salva LLM config</button>
+      <button type="submit" formaction="/llm/save-and-restart" formmethod="post">
+        Salva + restart Xiaozhi
+      </button>
+      <a class="button-link" href="/logs?source=xserver&lines=200">Vedi log Xiaozhi</a>
+    </div>
+  </form>
+
+  <div class="flash" style="margin-top: 16px;">
+    <div><strong>Note:</strong></div>
+    <div>Groq è il provider attualmente testato nel tuo setup.</div>
+    <div>Anthropic in questa fase usa il percorso OpenAI-compatible / compatibility layer.</div>
+  </div>
+</section>
+
+<script>
+  const presets = {{ presets|tojson }};
+  const providerInput = document.getElementById("provider");
+  const modelPresetInput = document.getElementById("model_preset");
+  const modelInput = document.getElementById("model");
+  const baseUrlInput = document.getElementById("base_url");
+  const temperatureInput = document.getElementById("temperature");
+
+  function fillModelPresetOptions(provider, currentModel = "") {
+    const preset = presets[provider];
+    modelPresetInput.innerHTML = '<option value="">-- scegli preset --</option>';
+
+    if (!preset || !preset.models) return;
+
+    for (const modelName of preset.models) {
+      const opt = document.createElement("option");
+      opt.value = modelName;
+      opt.textContent = modelName;
+      if (currentModel && currentModel === modelName) {
+        opt.selected = true;
+      }
+      modelPresetInput.appendChild(opt);
+    }
+  }
+
+  function applyProviderPreset(provider) {
+    const preset = presets[provider];
+    if (!preset) return;
+
+    modelInput.value = preset.default_model || "";
+    baseUrlInput.value = preset.base_url || "";
+    temperatureInput.value = preset.default_temperature ?? 0.7;
+
+    fillModelPresetOptions(provider, preset.default_model || "");
+  }
+
+  providerInput.addEventListener("change", function () {
+    applyProviderPreset(providerInput.value);
+  });
+
+  modelPresetInput.addEventListener("change", function () {
+    if (modelPresetInput.value) {
+      modelInput.value = modelPresetInput.value;
+    }
+  });
+
+  fillModelPresetOptions(providerInput.value, modelInput.value);
+</script>
+{% endblock %}

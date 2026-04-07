@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ page_title or "Xiaozhi Admin UI" }}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <h1>Xiaozhi Admin UI</h1>
+      <div class="subtitle">Solo LAN · Sibilla · ESP32/Xiaozhi</div>
+      <nav class="nav">
+        <a href="/">Dashboard</a>
+        <a href="/config">Config</a>
+        <a href="/backups">Backups</a>
+        <a href="/logs">Logs</a>
+        <a href="/devices">Devices</a>
+        <a href="/llm">LLM</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

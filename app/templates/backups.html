@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h2>Config Backups</h2>
+
+  {% if result %}
+    <div class="flash {% if result.ok %}flash-ok{% else %}flash-err{% endif %}">
+      {{ result.message }}
+    </div>
+  {% endif %}
+
+  <div class="actions" style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+    <form method="post" action="/backups/delete-all" onsubmit="return confirm('Eliminare TUTTI i backup?')">
+      <button type="submit">🧹 Elimina tutti i backup</button>
+    </form>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Filename</th>
+        <th>Azioni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in backups %}
+      <tr>
+        <td><code>{{ b }}</code></td>
+        <td style="display:flex; gap:8px; flex-wrap:wrap;">
+          <form method="post" action="/backups/restore" style="display:inline;" onsubmit="return confirm('Ripristinare questo backup?')">
+            <input type="hidden" name="filename" value="{{ b }}">
+            <button type="submit">♻️ Restore</button>
+          </form>
+
+          <form method="post" action="/backups/delete" style="display:inline;" onsubmit="return confirm('Eliminare questo backup?')">
+            <input type="hidden" name="filename" value="{{ b }}">
+            <button type="submit">🗑 Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="2">Nessun backup trovato</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
