@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h2>ASR</h2>
+
+  <div class="card" style="margin-bottom: 16px;">
+    <strong>Risoluzione profilo attivo</strong>
+    <div class="status-grid" style="margin-top: 12px;">
+      <div class="status-item">
+        <span class="muted">runtime.asr_profile</span>
+        <div style="margin-top: 6px;"><strong>{{ runtime_asr_profile or "non impostato" }}</strong></div>
+      </div>
+      <div class="status-item">
+        <span class="muted">selected_module.asr</span>
+        <div style="margin-top: 6px;"><strong>{{ legacy_selected_module_name or "non impostato" }}</strong></div>
+      </div>
+      <div class="status-item">
+        <span class="muted">selected_module.ASR</span>
+        <div style="margin-top: 6px;"><strong>{{ logical_selected_module_name or "non impostato" }}</strong></div>
+      </div>
+      <div class="status-item">
+        <span class="muted">Profilo attivo</span>
+        <div style="margin-top: 6px;">
+          <strong>{{ active.profile_name or "nessun profilo disponibile" }}</strong>
+          {% if active.profile_name %}
+            <span class="badge ok">ATTIVO</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <strong>Profili ASR</strong>
+    <div class="muted" style="margin-top: 6px;">
+      Vista read-only dei profili definiti sotto <code>ASR</code>.
+    </div>
+
+    {% if profiles %}
+      <div style="margin-top: 12px;">
+        {% for profile in profiles %}
+          <div class="card profile-card {% if profile.is_active %}profile-card-active{% endif %}" style="margin-bottom: 10px;">
+            <div>
+              <strong>{{ profile.profile_name }}</strong>
+              {% if profile.is_active %}
+                <span class="badge ok">ATTIVO</span>
+              {% endif %}
+            </div>
+            <div class="muted" style="margin-top: 6px;">Provider/type: {{ profile.provider or profile.type or "n/d" }}</div>
+            <div class="muted" style="margin-top: 4px;">Model: {{ profile.model or "n/d" }}</div>
+            {% if profile.base_url %}
+              <div class="muted" style="margin-top: 4px;">Base URL: <code>{{ profile.base_url }}</code></div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="flash" style="margin-top: 12px;">
+        Nessun profilo ASR trovato nella configurazione.
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

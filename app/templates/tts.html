@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h2>TTS</h2>
+
+  <div class="card" style="margin-bottom: 16px;">
+    <strong>Risoluzione profilo attivo</strong>
+    <div class="status-grid" style="margin-top: 12px;">
+      <div class="status-item">
+        <span class="muted">runtime.tts_profile</span>
+        <div style="margin-top: 6px;"><strong>{{ runtime_tts_profile or "non impostato" }}</strong></div>
+      </div>
+      <div class="status-item">
+        <span class="muted">selected_module.tts</span>
+        <div style="margin-top: 6px;"><strong>{{ legacy_selected_module_name or "non impostato" }}</strong></div>
+      </div>
+      <div class="status-item">
+        <span class="muted">selected_module.TTS</span>
+        <div style="margin-top: 6px;"><strong>{{ logical_selected_module_name or "non impostato" }}</strong></div>
+      </div>
+      <div class="status-item">
+        <span class="muted">Profilo attivo</span>
+        <div style="margin-top: 6px;">
+          <strong>{{ active.profile_name or "nessun profilo disponibile" }}</strong>
+          {% if active.profile_name %}
+            <span class="badge ok">ATTIVO</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <strong>Profili TTS</strong>
+    <div class="muted" style="margin-top: 6px;">
+      Vista read-only dei profili definiti sotto <code>TTS</code>, con supporto al caso Piper locale.
+    </div>
+
+    {% if profiles %}
+      <div style="margin-top: 12px;">
+        {% for profile in profiles %}
+          <div class="card profile-card {% if profile.is_active %}profile-card-active{% endif %}" style="margin-bottom: 10px;">
+            <div>
+              <strong>{{ profile.profile_name }}</strong>
+              {% if profile.is_active %}
+                <span class="badge ok">ATTIVO</span>
+              {% endif %}
+              {% if profile.is_local_piper %}
+                <span class="badge info">PIPER LOCALE</span>
+              {% endif %}
+            </div>
+            <div class="muted" style="margin-top: 6px;">Provider/type: {{ profile.provider or profile.type or "n/d" }}</div>
+            <div class="muted" style="margin-top: 4px;">Model: {{ profile.model or "n/d" }}</div>
+            <div class="muted" style="margin-top: 4px;">Voice: {{ profile.voice or "n/d" }}</div>
+            {% if profile.endpoint %}
+              <div class="muted" style="margin-top: 4px;">API URL / Base URL: <code>{{ profile.endpoint }}</code></div>
+            {% endif %}
+            {% if profile.speed != "" %}
+              <div class="muted" style="margin-top: 4px;">Speed: {{ profile.speed }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="flash" style="margin-top: 12px;">
+        Nessun profilo TTS trovato nella configurazione.
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
