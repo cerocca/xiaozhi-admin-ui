@@ -195,6 +195,10 @@ def _profile_has_api_key(value) -> bool:
     return bool(str(value or "").strip())
 
 
+def _provider_requires_api_key(provider_id: str) -> bool:
+    return provider_id in {"groq", "openai", "anthropic"}
+
+
 def _get_block_model(block: dict) -> str:
     if not isinstance(block, dict):
         return ""
@@ -206,9 +210,43 @@ def _get_block_model(block: dict) -> str:
     return str(block.get("model_name", "") or "").strip()
 
 
+def _normalize_llm_block_for_write(block: dict, model: str) -> dict:
+    normalized_block = dict(block) if isinstance(block, dict) else {}
+    normalized_model = str(model or "").strip()
+
+    if normalized_model:
+        normalized_block["model"] = normalized_model
+
+    legacy_model_name = str(normalized_block.get("model_name", "") or "").strip()
+    if legacy_model_name and legacy_model_name != normalized_block.get("model", ""):
+        return normalized_block
+
+    normalized_block.pop("model_name", None)
+    return normalized_block
+
+
+def _is_legacy_profile(profile_name: str, provider_id: str) -> bool:
+    profile_name = str(profile_name or "").strip()
+    provider_id = str(provider_id or "").strip()
+    if not profile_name:
+        return False
+
+    if profile_name in PROVIDER_PRESETS:
+        return False
+
+    preset = PROVIDER_PRESETS.get(provider_id, {})
+    expected_name = str(preset.get("module_name", "") or "").strip()
+    if expected_name and profile_name == expected_name:
+        return False
+
+    return any(ch.isupper() for ch in profile_name)
+
+
 def _build_profile_summary(profile_name: str, block: dict, active_profile_name: str) -> dict:
     block = block if isinstance(block, dict) else {}
     provider_id = _guess_provider(profile_name, block) if profile_name or block else ""
+    has_api_key = _profile_has_api_key(block.get("api_key"))
+    is_legacy = _is_legacy_profile(profile_name, provider_id)
 
     return {
         "profile_name": profile_name,
@@ -218,8 +256,15 @@ def _build_profile_summary(profile_name: str, block: dict, active_profile_name: 
         "model": _get_block_model(block),
         "temperature": block.get("temperature", PROVIDER_PRESETS.get(provider_id, {}).get("default_temperature", 0.7)),
         "api_key": str(block.get("api_key", "") or "").strip(),
-        "has_api_key": _profile_has_api_key(block.get("api_key")),
+        "has_api_key": has_api_key,
+        "requires_api_key": _provider_requires_api_key(provider_id),
+        "api_key_status": "present" if has_api_key else "missing",
         "is_active": profile_name == active_profile_name,
+        "is_legacy": is_legacy,
+        "legacy_note": (
+            "Profilo legacy, consigliato creare un nuovo profilo."
+            if is_legacy else ""
+        ),
         "raw_block": block,
     }
 
@@ -260,6 +305,9 @@ def _build_profile_form_data(summary: dict) -> dict:
         "base_url": summary.get("base_url", "") or preset.get("base_url", ""),
         "temperature": summary.get("temperature", preset.get("default_temperature", 0.7)),
         "is_active": summary.get("is_active", False),
+        "requires_api_key": summary.get("requires_api_key", _provider_requires_api_key(provider_id)),
+        "is_legacy": summary.get("is_legacy", False),
+        "legacy_note": summary.get("legacy_note", ""),
     }
 
 
@@ -267,6 +315,7 @@ def _build_llm_page_data(selected_profile_name: str = "") -> dict:
     presets = get_provider_presets()
     profiles = get_all_llm_configs()
     active = get_active_llm()
+    current = get_current_llm_config()
     active_profile_name = active.get("profile_name", "")
 
     if selected_profile_name and selected_profile_name in profiles:
@@ -289,10 +338,18 @@ def _build_llm_page_data(selected_profile_name: str = "") -> dict:
 
     return {
         "presets": presets,
-        "profiles": list(profiles.values()),
+        "profiles": sorted(
+            profiles.values(),
+            key=lambda profile: (
+                0 if profile.get("is_active") else 1,
+                str(profile.get("profile_name", "")).lower(),
+            ),
+        ),
         "profiles_by_name": profiles,
         "active": active,
         "selected": _build_profile_form_data(selected),
+        "runtime_llm_profile": current.get("runtime_llm_profile", ""),
+        "legacy_selected_module_name": current.get("legacy_selected_module_name", ""),
     }
 
 
@@ -390,7 +447,7 @@ def set_active_llm(profile_name: str) -> dict:
 
     llm_section = _get_dict(data, "LLM")
     if not isinstance(llm_section.get(profile_name), dict):
-        return {"ok": False, "message": f"Profilo LLM non trovato: {profile_name}"}
+        return {"ok": False, "message": f"Profilo inesistente: {profile_name}"}
 
     runtime = _ensure_dict(data, "runtime")
     runtime["llm_profile"] = profile_name
@@ -408,6 +465,7 @@ def set_active_llm(profile_name: str) -> dict:
     result = save_config(new_yaml)
     if result.get("ok"):
         active = _build_profile_summary(profile_name, llm_section.get(profile_name, {}), profile_name)
+        result["message"] = f"Profilo attivo cambiato: {profile_name}"
         result["selected_module_name"] = profile_name
         result["runtime_llm_profile"] = profile_name
         result["legacy_selected_module_name"] = (
@@ -470,7 +528,7 @@ def update_single_provider(
     if provider_id in {"groq", "openai", "anthropic"} and not final_api_key:
         return {
             "ok": False,
-            "message": f"API key mancante per provider {provider_id}",
+            "message": f"API key mancante: il provider {provider_id} richiede una chiave.",
         }
 
     preset = PROVIDER_PRESETS[provider_id]
@@ -485,6 +543,7 @@ def update_single_provider(
             "temperature": normalized["temperature"],
         }
     )
+    updated_block = _normalize_llm_block_for_write(updated_block, normalized["model"])
 
     llm_section[profile_name] = updated_block
 
@@ -506,6 +565,7 @@ def update_single_provider(
     if result.get("ok"):
         active_profile_name = _resolve_active_profile_name(data)
         summary = _build_profile_summary(profile_name, updated_block, active_profile_name)
+        result["message"] = f"Profilo aggiornato: {profile_name}"
         result["selected_module_name"] = profile_name
         result["provider"] = provider_id
         result["active_model"] = summary.get("model", "")
@@ -550,6 +610,10 @@ def create_provider_profile(provider_id: str, profile_name: str | None = None) -
         "model": preset["default_model"],
         "temperature": preset["default_temperature"],
     }
+    llm_section[final_profile_name] = _normalize_llm_block_for_write(
+        llm_section[final_profile_name],
+        preset["default_model"],
+    )
 
     new_yaml = yaml.safe_dump(
         data,
@@ -580,11 +644,11 @@ def delete_provider_profile(profile_name: str) -> dict:
 
     llm_section = _get_dict(data, "LLM")
     if not isinstance(llm_section.get(profile_name), dict):
-        return {"ok": False, "message": f"Profilo LLM non trovato: {profile_name}"}
+        return {"ok": False, "message": f"Profilo inesistente: {profile_name}"}
 
     active_profile_name = _resolve_active_profile_name(data)
     if profile_name == active_profile_name:
-        return {"ok": False, "message": f"Non puoi eliminare il profilo attivo: {profile_name}"}
+        return {"ok": False, "message": f"Profilo attivo non eliminabile: {profile_name}"}
 
     del llm_section[profile_name]
     data["LLM"] = llm_section
@@ -597,7 +661,7 @@ def delete_provider_profile(profile_name: str) -> dict:
 
     result = save_config(new_yaml)
     if result.get("ok"):
-        result["message"] = f"Profilo LLM eliminato: {profile_name}"
+        result["message"] = f"Profilo eliminato: {profile_name}"
         result["deleted_profile_name"] = profile_name
         result["selected_module_name"] = active_profile_name
 
