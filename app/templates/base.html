@@ -8,22 +8,19 @@
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 </head>
 <body>
+  {% set current_path = request.url.path if request and request.url and request.url.path else "" %}
+  {% set ai_stack_paths = ["/ai", "/llm", "/asr", "/tts", "/vad", "/intent", "/memory"] %}
   <header class="topbar">
     <div class="wrap">
       <h1>Xiaozhi Admin UI</h1>
       <div class="subtitle">Solo LAN · Sibilla · ESP32/Xiaozhi</div>
       <nav class="nav">
-        <a href="/">Dashboard</a>
-        <a href="/config">Config</a>
-        <a href="/backups">Backups</a>
-        <a href="/logs">Logs</a>
-        <a href="/devices">Devices</a>
-        <a href="/llm">LLM</a>
-        <a href="/asr">ASR</a>
-        <a href="/tts">TTS</a>
-        <a href="/vad">VAD</a>
-        <a href="/intent">Intent</a>
-        <a href="/memory">Memory</a>
+        <a href="/" class="{% if current_path == '/' %}active{% endif %}">Dashboard</a>
+        <a href="/config" class="{% if current_path.startswith('/config') %}active{% endif %}">Config</a>
+        <a href="/backups" class="{% if current_path.startswith('/backups') %}active{% endif %}">Backups</a>
+        <a href="/logs" class="{% if current_path.startswith('/logs') %}active{% endif %}">Logs</a>
+        <a href="/devices" class="{% if current_path.startswith('/devices') %}active{% endif %}">Devices</a>
+        <a href="/ai" class="{% if current_path in ai_stack_paths or current_path.startswith('/ai/') %}active{% endif %}">AI Stack</a>
       </nav>
     </div>
   </header>

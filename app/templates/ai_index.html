@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h2>AI Stack</h2>
+  <div class="muted" style="margin-top: 8px;">
+    Accesso rapido alle pagine di configurazione e overview dei moduli AI disponibili nella Admin UI.
+  </div>
+</section>
+
+<section class="grid">
+  {% for item in items %}
+    <article class="card ai-stack-card">
+      <h3 style="margin-top: 0;">{{ item.title }}</h3>
+      <p class="muted">
+        {% if item.title == "LLM" %}Generazione delle risposte (modello e profili){% endif %}
+        {% if item.title == "ASR" %}Speech -> text (riconoscimento vocale){% endif %}
+        {% if item.title == "TTS" %}Text -> speech (sintesi vocale){% endif %}
+        {% if item.title == "VAD" %}Rilevamento presenza voce{% endif %}
+        {% if item.title == "Intent" %}Interpretazione della richiesta{% endif %}
+        {% if item.title == "Memory" %}Gestione contesto e memoria{% endif %}
+      </p>
+      <div class="actions ai-stack-card-actions">
+        <a class="button-link" href="{{ item.href }}">Apri {{ item.title }}</a>
+      </div>
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}
