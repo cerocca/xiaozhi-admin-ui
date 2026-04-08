@@ -14,8 +14,10 @@ __pycache__/
 data/backups/config/*
 !data/backups/config/.gitkeep
 
-# OS
-.DS_Store
-
+# OS / temp accidental
 .DS_Store
 ._*
+*.tmp
+*~
+*.swp
+*.swo

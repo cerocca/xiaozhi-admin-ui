@@ -1,109 +1,99 @@
 # Project Rules — Xiaozhi Admin UI
 
 ## Obiettivo
-Mantenere il progetto semplice, robusto, manutenibile e installabile senza ambiguità.
-
----
+Mantenere il progetto semplice, robusto, coerente con il deploy reale e facile da manutenere senza refactor massivi.
 
 ## 1. Regola principale
-Non rompere mai il setup funzionante di `xiaozhi-esp32-server`.
+Non rompere mai il setup funzionante di `xiaozhi-esp32-lightserver`.
 
 Ogni modifica deve privilegiare:
 - prudenza
-- reversibilità
+- reversibilita
 - isolamento
-- facilità di debug
+- facilita di debug
 
----
-
-## 2. Architettura
+## 2. Confine architetturale
 Preferire:
 - FastAPI + Jinja2
-- systemd host-native
-- wrapper scripts
+- host-native + systemd
+- wrapper scripts noti
 - componenti minimi
 
-Evitare salvo forte motivo:
+Evitare salvo motivo forte:
 - frontend pesanti
-- stack complessi
+- nuove dipendenze non necessarie
 - coupling forte col runtime Xiaozhi
-- modifiche invasive al container
+- cambi invasivi al container o al modello YAML generale
 
----
-
-## 3. Sicurezza
-Regole:
-- accesso solo LAN
-- niente shell arbitraria dalla UI
-- sudo minimo indispensabile
-- restart espliciti
-- backup prima di scrivere config
-
----
-
-## 4. Operatività
+## 3. Operazioni critiche
 Ogni azione critica deve essere:
 - esplicita
 - leggibile
 - tracciabile
 - debuggabile
 
-Restart e save config devono restare separati nel MVP.
+Regole concrete:
+- backup prima di scrivere config
+- restart separato dal save config
+- niente shell arbitraria dalla UI
+- compatibilita mantenuta dove il setup reale la usa ancora
 
----
+## 4. Regole LLM
+Stato supportato oggi:
+- multi-provider Livello 1
+- piu profili sotto `LLM`
+- un solo profilo attivo alla volta
 
-## 5. Qualità documentazione
-La documentazione deve essere realmente eseguibile.
+Source of truth:
+- `runtime.llm_profile`
 
-Deve sempre includere:
+Compatibilita legacy ancora supportata:
+- `selected_module.llm`
+- endpoint legacy di salvataggio LLM
+
+Regola importante:
+- `provider_id` non e il nome del profilo
+- `profile_name` e la chiave reale sotto `LLM`
+
+Livello 2 resta fuori scope finche non serve davvero:
+- routing/fallback multi-provider
+- validazione strutturale completa del blocco `LLM`
+- UI guidata completa per capability avanzate
+
+## 5. Documentazione
+La documentazione deve essere eseguibile e aderente al progetto reale.
+
+Deve includere:
+- path reali correnti
 - prerequisiti
-- path reali
 - comandi esatti
 - verifiche attese
-- errori comuni
-- checklist finale
+- limiti noti
+- punti legacy ancora supportati
 
-Documentazione solo descrittiva non basta.
+Documentazione vecchia ma elegante vale meno di documentazione corta ma vera.
 
----
-
-## 6. Ordine di sviluppo
-Ordine corretto:
-1. MVP stabile
-2. miglioramenti operativi
-3. UX più pulita
-4. configurazione guidata provider/modelli
-
-Mai sacrificare la stabilità per UX o feature premature.
-
----
-
-## 7. Regole di modifica
-Quando si aggiungono feature:
+## 6. Regole di modifica
+Quando si tocca il repo:
 - fare cambi piccoli
-- evitare refactor inutili
-- preservare compatibilità col setup esistente
-- aggiornare subito i documenti rilevanti
+- non fare refactor ampi senza bisogno operativo
+- non cambiare UX o comportamento runtime salvo bug evidenti
+- non introdurre nuove dipendenze per cleanup minori
+- aggiornare subito i documenti se cambia il comportamento reale
 
----
+## 7. Repo hygiene
+Non tenere nel repository:
+- `.DS_Store`
+- file AppleDouble `._*`
+- `__pycache__`
+- `.pyc`
+- file temporanei o accidentali
+- backup locali non usati dal runtime
 
-## 8. Confine con Xiaozhi server
-`xiaozhi-admin-ui` è separato da `xiaozhi-esp32-server`.
+`.gitignore` deve restare minimale e focalizzato sul rumore reale del progetto.
 
-Deve:
-- osservare
-- configurare
-- controllare
-
-Non deve:
-- incorporare il server
-- sostituire il runtime
-- dipendere da refactor profondi del backend Xiaozhi
-
----
-
-## 9. Filosofia finale
-Semplice batte elegante.  
-Robusto batte sofisticato.  
-Controllabile batte automatico.  
+## 8. Filosofia finale
+Semplice batte elegante.
+Robusto batte sofisticato.
+Controllabile batte automatico.
 Documentato batte implicito.
