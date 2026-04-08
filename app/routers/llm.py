@@ -32,6 +32,8 @@ def _render_llm_page(
         "profiles": safe_page_data.get("profiles", []),
         "selected": safe_page_data.get("selected", {}),
         "active": safe_page_data.get("active", {}),
+        "runtime_llm_profile": safe_page_data.get("runtime_llm_profile", ""),
+        "legacy_selected_module_name": safe_page_data.get("legacy_selected_module_name", ""),
         "result": result,
     }
 

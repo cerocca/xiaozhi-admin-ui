@@ -89,11 +89,22 @@ pre {
 }
 
 .badge {
-  display: inline-block;
-  padding: 4px 10px;
+  display: inline-flex;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  min-height: 22px;
+  padding: 0 8px;
+  margin: 0;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
   border: 1px solid var(--border);
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .badge.ok {
@@ -120,10 +131,41 @@ pre {
   background: #082f49;
 }
 
+.badge.local {
+  color: #99f6e4;
+  border-color: #0f766e;
+  background: #042f2e;
+}
+
 .badge.muted {
   color: #cbd5e1;
   border-color: #334155;
   background: #1e293b;
+}
+
+.badge.readonly {
+  color: #e5e7eb;
+  border-color: #6b7280;
+  background: #374151;
+}
+
+.badge.ok,
+.badge.err,
+.badge.warn,
+.badge.info,
+.badge.local,
+.badge.muted,
+.badge.readonly {
+  box-sizing: border-box;
+  min-height: 22px;
+  padding: 0 8px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  border-width: 1px;
+  border-style: solid;
+  transform: none;
 }
 
 .flash {
@@ -386,6 +428,64 @@ textarea {
 .ai-stack-card {
   display: flex;
   flex-direction: column;
+}
+
+.ai-stack-section {
+  margin-top: 24px;
+}
+
+.ai-stack-section-managed {
+  border-color: #14532d;
+}
+
+.ai-stack-section-readonly {
+  border-color: #334155;
+}
+
+.ai-stack-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ai-stack-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.ai-stack-badges .badge {
+  margin: 0;
+}
+
+.ai-stack-badges .badge.muted {
+  margin-top: 0;
+}
+
+.ai-stack-summary {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #0b1220;
+}
+
+.ai-stack-summary code {
+  margin-left: 8px;
+  white-space: nowrap;
+  background: #111827;
+  padding: 3px 7px;
+  border-radius: 6px;
+  display: inline-block;
+  border: 1px solid var(--border);
+}
+
+.ai-stack-card-readonly {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(17, 24, 39, 1));
 }
 
 .ai-stack-card-actions {

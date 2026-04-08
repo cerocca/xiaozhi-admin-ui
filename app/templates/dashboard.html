@@ -4,7 +4,14 @@
 <section class="grid">
   <article class="card">
     <h2>Server Xiaozhi</h2>
-    <p><strong>Healthy:</strong> {{ status.xiaozhi.healthy }}</p>
+    <p>
+      <strong>Healthy:</strong>
+      {% if status.xiaozhi.healthy %}
+        <span class="badge ok">OK</span>
+      {% else %}
+        <span class="badge err">ERRORE</span>
+      {% endif %}
+    </p>
     <p><strong>Summary:</strong> {{ status.xiaozhi.summary }}</p>
     <pre>{{ status.xiaozhi.details }}</pre>
 
@@ -17,7 +24,14 @@
 
   <article class="card">
     <h2>Piper API</h2>
-    <p><strong>Healthy:</strong> {{ status.piper.healthy }}</p>
+    <p>
+      <strong>Healthy:</strong>
+      {% if status.piper.healthy %}
+        <span class="badge ok">OK</span>
+      {% else %}
+        <span class="badge err">ERRORE</span>
+      {% endif %}
+    </p>
     <p><strong>Summary:</strong> {{ status.piper.summary }}</p>
     <pre>{{ status.piper.details }}</pre>
 
@@ -30,7 +44,14 @@
 
   <article class="card">
     <h2>Config runtime</h2>
-    <p><strong>Healthy:</strong> {{ status.config.healthy }}</p>
+    <p>
+      <strong>Healthy:</strong>
+      {% if status.config.healthy %}
+        <span class="badge ok">OK</span>
+      {% else %}
+        <span class="badge err">ERRORE</span>
+      {% endif %}
+    </p>
     <p><strong>Path:</strong> {{ status.config.summary }}</p>
     <pre>{{ status.config.details }}</pre>
 
