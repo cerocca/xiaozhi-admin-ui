@@ -1,7 +1,8 @@
 import httpx
 
+from app.config import settings
 
-HEALTH_URL = "http://192.168.1.69:8003/api/health"
+HEALTH_URL = f"http://{settings.backend_host}:{settings.backend_health_port}/api/health"
 HEALTH_FALLBACK = {
     "llm": "error",
     "asr": "error",

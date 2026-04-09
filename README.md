@@ -1,74 +1,119 @@
 # Xiaozhi Admin UI
 
-## Scopo
-`xiaozhi-admin-ui` e una Web UI FastAPI/Jinja2 per amministrare in LAN un'istanza gia funzionante di `xiaozhi-esp32-lightserver`, senza introdurre coupling forte con il runtime audio.
+`xiaozhi-admin-ui` e una Web UI server-rendered per amministrare un'istanza esistente di `xiaozhi-esp32-lightserver`.
 
-Serve oggi a:
-- vedere lo stato del backend Xiaozhi, di Piper e del file config
-- leggere e modificare `data/.config.yaml`
-- creare backup automatici prima dei salvataggi e fare rollback
-- riavviare Xiaozhi e Piper in modo esplicito
-- leggere log Xiaozhi e Piper
-- ricavare una vista device dai log recenti
-- gestire il multi-provider LLM di Livello 1 tramite profili sotto `LLM`
+Stack attuale:
+- FastAPI
+- Jinja templates
+- CSS semplice
+- rendering server-side
+- target LAN-first
 
-## Stato reale del progetto
-Lo stato funzionale non e piu il solo MVP iniziale.
+## Cosa fa
+- mostra una dashboard operativa con stato servizi e azioni rapide
+- distingue tra stato config e stato runtime
+- legge e modifica il file YAML reale del backend
+- crea backup config prima dei salvataggi e permette restore
+- mostra log backend e log Piper
+- espone una vista device derivata dal runtime
+- gestisce profili `LLM`, `ASR` e `TTS`
+- mostra moduli read-only come `VAD`, `Intent` e `Memory`
+- integra la health runtime del backend tramite `/api/health`
 
-Gia presenti:
-- dashboard operativa
-- config editor con validazione YAML minima
-- backup config + restore
-- pagine log e device
-- pagina LLM multi-provider Livello 1
-- compatibilita con setup LAN reale via systemd + wrapper scripts
+## Cosa non fa
+- non sostituisce il backend `xiaozhi-esp32-lightserver`
+- non esegue il runtime audio
+- non e una SPA
+- non richiede una pipeline frontend separata
+- non introduce polling continuo lato UI
+- non implementa autenticazione applicativa obbligatoria
+- non orchestra routing o fallback LLM avanzati
 
-Non ancora in scope:
-- refactor massivi del modello YAML
-- orchestrazione LLM avanzata, fallback o routing automatico
-- UI guidata completa per ASR e TTS
-- persistenza device in database
-- autenticazione applicativa obbligatoria
+## Integrazione con il backend
+La UI e separata dal backend.
 
-## LLM multi-provider: regola attuale
-La UI supporta piu profili LLM contemporaneamente dentro `LLM`.
+Interagisce con:
+- il file config reale del backend
+- i wrapper script locali in `scripts/`
+- `docker compose` per il backend Xiaozhi
+- `systemctl` e `journalctl` per Piper
+- l'endpoint runtime `/api/health` esposto dal backend
 
-- `runtime.llm_profile` e la source of truth del profilo attivo
-- `selected_module.llm` resta supportato come compatibilita legacy
-- `profile_name` = nome della chiave sotto `LLM`
-- `provider_id` = preset UI usato per proporre `type`, `base_url`, `model` e validazioni minime
+La UI non modifica immagini Docker, compose file o codice del backend.
 
-Esempio concettuale:
-- `provider_id`: `openai`
-- `profile_name`: `openai_fast`
+## Dipendenze
+Dipendenze operative minime:
+- Linux
+- Python 3.11 o compatibile con il progetto
+- virtualenv
+- backend `xiaozhi-esp32-lightserver` gia presente
+- accesso in lettura e scrittura al file config del backend
+- Docker e Docker Compose per la gestione del backend
+- systemd per la gestione del servizio Piper
 
-Questo e Livello 1: piu profili coexistono, uno e attivo alla volta.
+Dipendenze Python:
+- FastAPI
+- Uvicorn
+- Jinja2
+- PyYAML
+- httpx
 
-## Architettura in una riga
-Browser LAN -> FastAPI Admin UI -> service layer -> wrapper scripts -> Docker Compose / systemd / file YAML
+Vedi `requirements.txt`.
 
-## Requisiti operativi
-- host Linux
-- backend `xiaozhi-esp32-lightserver` gia presente e funzionante
-- Piper API gia presente e funzionante
-- Python 3 installato
-- Docker + Docker Compose funzionanti
-- permessi coerenti per leggere/scrivere la config Xiaozhi
+## Pagine principali
+- `/`: dashboard operativa
+- `/ai`: indice AI Stack
+- `/llm`: CRUD profili LLM
+- `/asr`: CRUD profili ASR
+- `/tts`: CRUD profili TTS
+- `/vad`: vista read-only
+- `/intent`: vista read-only
+- `/memory`: vista read-only
+- `/config`: editor config YAML
+- `/backups`: storico backup e restore
+- `/logs`: log backend e Piper
+- `/devices`: vista device runtime
 
-## Path di riferimento correnti
-Path di deploy previsti dal codice attuale:
-- Admin UI: `/home/ciru/xiaozhi-admin-ui`
-- Backend Xiaozhi: `/home/ciru/xiaozhi-esp32-lightserver`
-- Config Xiaozhi: `/home/ciru/xiaozhi-esp32-lightserver/data/.config.yaml`
-- Backup Admin UI: `/home/ciru/xiaozhi-admin-ui/data/backups/config`
-- Piper systemd service: `piper-api`
-- URL UI: `http://192.168.1.69:8088`
+## Avvio rapido
+Esempio generico:
 
-Nota:
-- in sviluppo il repository puo stare altrove
-- in runtime gli script e alcuni path applicativi sono ancora allineati al deploy `/home/ciru/...`
+```bash
+git clone <REPO_URL> /home/<user>/xiaozhi-admin-ui
+cd /home/<user>/xiaozhi-admin-ui
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port <ADMIN_UI_PORT>
+```
 
-## Documenti utili
-- `SETUP.md`: installazione e validazione operativa
-- `ARCHITECTURE.md`: confini architetturali, LLM Livello 1 e punti legacy
-- `PROJECT_RULES.md`: regole di modifica del progetto
+Apri poi:
+
+```text
+http://<SERVER_IP>:<ADMIN_UI_PORT>
+```
+
+Per una guida completa e replicabile vedi `SETUP.md`.
+
+## Limiti reali da conoscere
+Il repository non e ancora completamente indipendente dall'host.
+
+Valori configurabili via `.env`:
+- host e porta UI
+- path backend Xiaozhi
+- path file config
+- health URL di Piper
+- nome servizio systemd di Piper
+
+Valori ancora hardcoded nel codice o negli script:
+- path di alcuni wrapper script
+- directory backend usata da `scripts/xserver.sh`
+- URL backend usato per `/api/health`
+- alcuni default in `app/config.py`
+
+Questo significa che un deploy su un altro server e possibile, ma oggi va fatto seguendo la sezione "Adattamenti obbligatori" in `SETUP.md`.
+
+## Documenti del repo
+- `SETUP.md`: installazione da zero, systemd, troubleshooting
+- `ARCHITECTURE.md`: confini architetturali e flussi principali
+- `PROJECT_RULES.md`: regole di progetto e scelte operative
+- `CHANGELOG.md`: modifiche rilevanti della UI

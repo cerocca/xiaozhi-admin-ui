@@ -1,99 +1,90 @@
-# Project Rules — Xiaozhi Admin UI
+# PROJECT_RULES
 
-## Obiettivo
-Mantenere il progetto semplice, robusto, coerente con il deploy reale e facile da manutenere senza refactor massivi.
+## 1. Obiettivo
+Mantenere `xiaozhi-admin-ui` semplice, operativa e facile da capire anche da chi non conosce gia il progetto.
 
-## 1. Regola principale
-Non rompere mai il setup funzionante di `xiaozhi-esp32-lightserver`.
+## 2. Principi guida
+- semplicita prima delle feature
+- patch incrementali prima dei refactor ampi
+- chiarezza operativa prima dell'eleganza
+- debug reale prima dell'astrazione
+- comportamento prevedibile prima dell'automazione
 
-Ogni modifica deve privilegiare:
-- prudenza
-- reversibilita
-- isolamento
-- facilita di debug
+## 3. Confine del progetto
+La Admin UI:
+- osserva
+- modifica la config
+- esegue azioni operative limitate
+- legge stato runtime dal backend
 
-## 2. Confine architetturale
+La Admin UI non deve:
+- assorbire responsabilita del backend
+- diventare una SPA complessa
+- introdurre orchestrazione non necessaria
+- nascondere la differenza tra config e runtime
+
+## 4. Regole tecniche
 Preferire:
-- FastAPI + Jinja2
-- host-native + systemd
-- wrapper scripts noti
-- componenti minimi
+- FastAPI
+- Jinja templates
+- CSS semplice
+- rendering server-side
+- wrapper script piccoli e leggibili
+- integrazioni esplicite con `docker compose`, `systemctl` e file YAML
 
 Evitare salvo motivo forte:
-- frontend pesanti
-- nuove dipendenze non necessarie
-- coupling forte col runtime Xiaozhi
-- cambi invasivi al container o al modello YAML generale
+- JavaScript complesso
+- frontend framework pesanti
+- nuove dipendenze per rifiniture marginali
+- overengineering
+- refactor massivi non richiesti da un problema reale
 
-## 3. Operazioni critiche
-Ogni azione critica deve essere:
-- esplicita
-- leggibile
-- tracciabile
-- debuggabile
+## 5. Regole di modifica
+Quando si modifica il progetto:
 
-Regole concrete:
-- backup prima di scrivere config
-- restart separato dal save config
+1. fare cambi piccoli e reversibili
+2. non rompere il setup gia funzionante
+3. non cambiare comportamento operativo senza motivo chiaro
+4. non introdurre feature non richieste dentro patch di manutenzione
+5. aggiornare la documentazione quando cambia il comportamento reale
+
+## 6. Regole operative
+- backup prima delle scritture critiche
+- restart separato dal salvataggio config
 - niente shell arbitraria dalla UI
-- compatibilita mantenuta dove il setup reale la usa ancora
+- azioni operative sempre esplicite
+- output utile al debug reale
+- LAN-first come scenario principale
 
-## 4. Regole LLM
-Stato supportato oggi:
-- multi-provider Livello 1
-- piu profili sotto `LLM`
-- un solo profilo attivo alla volta
+## 7. Regole UI
+La UI deve restare:
+- leggibile
+- concreta
+- orientata al troubleshooting
+- utile anche senza conoscere il codice
 
-Source of truth:
-- `runtime.llm_profile`
+Da evitare:
+- interfacce troppo astratte
+- wizard inutili
+- automazioni opache
+- stato nascosto o ambiguo
 
-Compatibilita legacy ancora supportata:
-- `selected_module.llm`
-- endpoint legacy di salvataggio LLM
+## 8. Regole documentazione
+La documentazione deve essere:
+- eseguibile
+- aggiornata
+- indipendente dall'host personale di chi scrive
+- basata su placeholder chiari
+- senza salti logici
 
-Regola importante:
-- `provider_id` non e il nome del profilo
-- `profile_name` e la chiave reale sotto `LLM`
+Ogni guida deve spiegare:
+- dove cambiare path
+- dove cambiare IP
+- dove cambiare porte
+- quali limiti attuali esistono davvero
 
-Livello 2 resta fuori scope finche non serve davvero:
-- routing/fallback multi-provider
-- validazione strutturale completa del blocco `LLM`
-- UI guidata completa per capability avanzate
-
-## 5. Documentazione
-La documentazione deve essere eseguibile e aderente al progetto reale.
-
-Deve includere:
-- path reali correnti
-- prerequisiti
-- comandi esatti
-- verifiche attese
-- limiti noti
-- punti legacy ancora supportati
-
-Documentazione vecchia ma elegante vale meno di documentazione corta ma vera.
-
-## 6. Regole di modifica
-Quando si tocca il repo:
-- fare cambi piccoli
-- non fare refactor ampi senza bisogno operativo
-- non cambiare UX o comportamento runtime salvo bug evidenti
-- non introdurre nuove dipendenze per cleanup minori
-- aggiornare subito i documenti se cambia il comportamento reale
-
-## 7. Repo hygiene
-Non tenere nel repository:
-- `.DS_Store`
-- file AppleDouble `._*`
-- `__pycache__`
-- `.pyc`
-- file temporanei o accidentali
-- backup locali non usati dal runtime
-
-`.gitignore` deve restare minimale e focalizzato sul rumore reale del progetto.
-
-## 8. Filosofia finale
-Semplice batte elegante.
-Robusto batte sofisticato.
-Controllabile batte automatico.
-Documentato batte implicito.
+## 9. Filosofia finale
+- semplice batte sofisticato
+- robusto batte elegante
+- documentato batte implicito
+- osservabile batte magico

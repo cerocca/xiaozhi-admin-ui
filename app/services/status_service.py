@@ -55,7 +55,7 @@ def get_xiaozhi_status() -> dict:
 
 
 def get_piper_status() -> dict:
-    svc = settings.piper_systemd_service
+    svc = settings.piper_service_name
     active = _run(["systemctl", "is-active", svc])
     enabled = _run(["systemctl", "is-enabled", svc])
 
@@ -95,4 +95,3 @@ def get_dashboard_status() -> dict:
         "piper": get_piper_status(),
         "config": get_config_status(),
     }
-

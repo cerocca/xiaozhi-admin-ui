@@ -11,7 +11,7 @@ templates = Jinja2Templates(directory="app/templates")
 @router.post("/actions/xserver/restart")
 def restart_xserver(request: Request):
     result = run_command(
-        ["/home/ciru/xiaozhi-admin-ui/scripts/xserver.sh", "restart"],
+        [settings.xserver_script_path, "restart"],
         timeout=30,
     )
     return templates.TemplateResponse(
@@ -28,7 +28,7 @@ def restart_xserver(request: Request):
 @router.post("/actions/piper/restart")
 def restart_piper(request: Request):
     result = run_command(
-        ["/home/ciru/xiaozhi-admin-ui/scripts/piper.sh", "restart"],
+        [settings.piper_script_path, "restart"],
         timeout=30,
     )
     return templates.TemplateResponse(
@@ -62,7 +62,7 @@ def stop_xiaozhi(request: Request):
 @router.post("/actions/stop-piper")
 def stop_piper(request: Request):
     result = run_command(
-        ["systemctl", "stop", settings.piper_systemd_service],
+        ["systemctl", "stop", settings.piper_service_name],
         timeout=30,
     )
     return templates.TemplateResponse(

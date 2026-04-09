@@ -1,202 +1,180 @@
-# Architecture — Xiaozhi Admin UI
+# ARCHITECTURE
 
-## Ruolo
-`xiaozhi-admin-ui` e un pannello di management host-side per `xiaozhi-esp32-lightserver`.
+## 1. Ruolo della Admin UI
+`xiaozhi-admin-ui` e un pannello operativo separato dal backend `xiaozhi-esp32-lightserver`.
 
-Responsabilita attuali:
-- osservare stato servizi e config
-- modificare il file YAML reale
-- creare backup e rollback
-- lanciare restart espliciti
-- leggere log
-- offrire una gestione LLM multi-provider di Livello 1
+Scopo:
+- osservare lo stato del sistema
+- leggere e modificare la config reale
+- mostrare runtime health
+- eseguire azioni operative semplici
+- facilitare debug e manutenzione in LAN
 
-Non partecipa al runtime audio e non sostituisce il backend Xiaozhi.
+Non fa parte del runtime audio.
+Non sostituisce il backend.
 
-## Principio architetturale
-Separare sempre:
-- runtime Xiaozhi
-- tooling admin
+## 2. Separazione tra UI e backend
+La separazione e intenzionale.
 
-Questo mantiene basso il rischio operativo e rende il debug piu leggibile.
+La UI:
+- gira come applicazione FastAPI host-side
+- renderizza HTML lato server
+- usa wrapper script locali
+- legge e scrive il file config del backend
 
-## Posizionamento nel sistema
+Il backend:
+- resta un progetto separato
+- espone runtime health via `/api/health`
+- continua a gestire il runtime reale
+
+Questa separazione serve a evitare coupling forte tra interfaccia amministrativa e runtime.
+
+## 3. Vista d'insieme
 
 ```text
 Browser LAN
     ->
-xiaozhi-admin-ui (FastAPI, host-native, systemd)
+xiaozhi-admin-ui
     ->
 service layer
     ->
-wrapper scripts / file access
-    |-- docker compose (xiaozhi-esp32-lightserver)
-    |-- systemctl / journalctl (piper-api)
-    `-- /home/ciru/xiaozhi-esp32-lightserver/data/.config.yaml
+wrapper scripts + file config + endpoint HTTP
+    |-- docker compose per xiaozhi-esp32-lightserver
+    |-- systemctl e journalctl per Piper
+    |-- file YAML reale del backend
+    `-- /api/health del backend
 ```
 
-## Componenti principali
-
-### Web application
-Stack:
+## 4. Stack tecnico
 - FastAPI
-- Jinja2
-- CSS custom minimale
+- Jinja templates
+- CSS semplice
+- server-rendered
 - nessuna SPA
 - nessun build frontend
+- nessun database applicativo
 
-Router reali:
-- `/`
-- `/config`
-- `/backups`
-- `/logs`
-- `/devices`
-- `/llm`
-- `/actions/*`
+## 5. Pagine principali
+- `/`: dashboard operativa
+- `/ai`: vista AI Stack
+- `/llm`: CRUD LLM
+- `/asr`: CRUD ASR
+- `/tts`: CRUD TTS
+- `/vad`: modulo read-only
+- `/intent`: modulo read-only
+- `/memory`: modulo read-only
+- `/config`: editor YAML
+- `/backups`: backup e restore
+- `/logs`: log backend e Piper
+- `/devices`: stato device derivato dal runtime
 
-### Service layer
-`app/services/status_service.py`
-- stato backend Xiaozhi via `docker compose ps`
-- stato Piper via `systemctl` + health HTTP
+## 6. Flussi principali
+### Dashboard operativa
+Mostra:
+- stato backend
+- stato Piper
 - stato file config
+- accessi rapidi a restart, stop e log
 
-`app/services/config_service.py`
-- read config
-- validazione YAML minima
-- backup
-- scrittura atomica
-- verifica post-write
-- rollback
+### Config editor
+Flusso:
+1. lettura del file YAML reale
+2. modifica lato UI
+3. validazione minima YAML
+4. backup preventivo
+5. scrittura atomica
+6. verifica post-write
 
-`app/services/log_service.py`
-- log Xiaozhi via wrapper `xserver.sh`
-- log Piper via wrapper `piper.sh`
+### Backup e restore
+Flusso:
+1. elenco backup disponibili
+2. scelta backup
+3. restore sul file config reale
+4. verifica post-write
 
-`app/services/device_service.py`
-- ricostruzione device log-derived
+### AI Stack
+La pagina `/ai` unisce:
+- stato di configurazione dei moduli
+- stato runtime letto dal backend
+- accesso alle pagine di dettaglio `LLM`, `ASR`, `TTS`
+- moduli read-only come `VAD`, `Intent`, `Memory`
 
-`app/services/llm_service.py`
-- lettura profili sotto `LLM`
-- risoluzione profilo attivo
-- CRUD minimo dei profili
-- aggiornamento riferimento attivo
-- compatibilita con entry legacy
-
-`app/services/command_service.py`
-- esecuzione wrapper scripts con timeout e risultato strutturato
-
-### Template layer
-Template principali:
-- `dashboard.html`
-- `config_editor.html`
-- `backups.html`
-- `logs.html`
-- `devices.html`
-- `llm.html`
-- `action_result.html`
-
-Scelta intenzionale:
-- rendering server-side
-- comportamento semplice
-- nessuna pipeline frontend separata
-
-## Integrazione con backend e host
-
-### Backend Xiaozhi
-Il backend resta separato e containerizzato.
-
-La UI interagisce con:
-- `docker compose ps`
-- `docker compose restart`
-- `docker compose logs`
-- `data/.config.yaml`
-
-Non modifica immagini, compose file o codice runtime del backend.
-
-### Piper
-`piper-api` resta un servizio host-native.
-
-La UI usa:
-- `systemctl`
-- `journalctl`
-- health check HTTP locale
-
-### Wrapper scripts
-La UI non esegue shell arbitraria.
-Usa soltanto:
-- `scripts/admin-ui.sh`
-- `scripts/xserver.sh`
-- `scripts/piper.sh`
-
-## Gestione configurazione
-
-### Save config
-UI -> validazione YAML -> backup -> write atomico -> verifica post-write
-
-### Rollback
-UI -> scelta backup -> restore -> verifica post-write
-
-Scelta voluta:
-- restart separato dal save
-- operazioni esplicite
-- minor rischio di side-effect
-
-## LLM multi-provider
-
-### Livello 1: gia implementato
-La sezione `LLM` puo contenere piu profili.
-Ogni profilo e una chiave YAML indipendente.
-
-Concetti da tenere distinti:
-- `profile_name`: nome del profilo, cioe la chiave sotto `LLM`
-- `provider_id`: preset UI usato per dedurre/validare campi noti del provider
-
-Esempio:
-- `profile_name = openai_fast`
-- `provider_id = openai`
-
-Regola attuale del profilo attivo:
-1. `runtime.llm_profile` e la source of truth
-2. `selected_module.llm` resta letto e aggiornato come compatibilita legacy
-3. se mancano entrambi, il service prova a risolvere un profilo esistente in `LLM`
-
-Compatibilita legacy ancora supportata:
-- endpoint legacy `/llm/save`
-- endpoint legacy `/llm/save-and-restart`
-- campo YAML `selected_module.llm`
-
-Questi punti legacy esistono per non rompere setup gia in uso, non per guidare l'evoluzione futura.
-
-### Livello 2: volutamente rimandato
-Fuori scope per ora:
-- routing automatico tra provider
-- fallback intelligente
-- UI guidata completa per capability/provider/model
-- validazione forte dell'intero modello YAML
-- normalizzazione strutturale del blocco `LLM`
-
-## Devices e log
-La pagina `/devices` resta log-derived:
-- nessun DB
-- nessuna migrazione
-- accuratezza limitata ai log recenti
-
-La pagina `/logs` resta on-demand:
-- tail numerico
+### Logs
+La pagina `/logs` e on-demand:
+- nessuno streaming continuo complesso
 - refresh esplicito
-- niente stream realtime complesso
+- tail numerico
 
-## Persistenza
-Persistenza minima attuale:
-- config Xiaozhi reale
-- backup config in `/home/ciru/xiaozhi-admin-ui/data/backups/config`
+### Devices
+La pagina `/devices` e runtime-oriented e log-derived:
+- nessun database
+- nessuna persistenza dedicata
+- precisione limitata alle informazioni disponibili
 
-Nessun database applicativo.
+## 7. Config vs runtime
+Questa distinzione e centrale nel progetto.
 
-## Sicurezza
-Scelte attuali:
-- LAN only
-- bind su IP LAN
-- nessuna auth applicativa obbligatoria
-- niente shell libera dalla UI
-- permessi minimi per leggere/scrivere config e usare i wrapper
+Config:
+- rappresenta quello che e scritto nella configurazione del backend
+- viene letto e modificato tramite file YAML
+- e persistente
+
+Runtime:
+- rappresenta quello che il backend sta usando davvero in quel momento
+- viene osservato tramite `/api/health`
+- puo divergere dalla config se il backend non e stato riavviato o se il runtime e degradato
+
+La UI espone entrambe le viste per aiutare il debug reale.
+
+## 8. Integrazione `/api/health`
+La UI interroga il backend Xiaozhi tramite `/api/health` per leggere almeno:
+- stato `llm`
+- stato `asr`
+- stato `tts`
+- stato `device`
+
+Uso pratico:
+- arricchisce la dashboard AI
+- distingue cio che e configurato da cio che e realmente in esecuzione
+- evita di assumere che config corretta significhi runtime sano
+
+Limite attuale:
+- l'URL del backend health non e ancora completamente parametrizzato via `.env`
+- per un deploy su un altro server va verificato e, se necessario, aggiornato nel codice
+
+## 9. Moduli AI
+### LLM
+Supporta CRUD di profili `LLM`.
+
+Regole attuali:
+- possono esistere piu profili contemporaneamente
+- un solo profilo e attivo alla volta
+- `runtime.llm_profile` e la source of truth principale
+- `selected_module.llm` resta supportato come compatibilita legacy
+
+### ASR
+Supporta CRUD di profili `ASR` con distinzione tra profilo selezionato e profilo attivo.
+
+### TTS
+Supporta CRUD di profili `TTS`, inclusi campi operativi come endpoint, model e voice.
+
+### Moduli read-only
+`VAD`, `Intent` e `Memory` sono esposti come viste di consultazione, non come editor completi.
+
+## 10. Limiti intenzionali
+Scelte volute del progetto:
+- niente SPA
+- niente frontend complesso
+- niente polling continuo
+- niente orchestrazione automatica avanzata
+- niente refactor massivi del modello YAML
+- niente database applicativo
+
+Questi limiti servono a mantenere la UI semplice, leggibile e utile per debug operativo reale.
+
+## 11. Limiti pratici attuali
+Limiti da conoscere leggendo il repo oggi:
+- alcuni path sono ancora assoluti
+- alcuni wrapper si aspettano un deploy locale vicino al backend
+- la UI non e pensata come pannello remoto universale
+- alcune compatibilita legacy restano per non rompere setup gia funzionanti

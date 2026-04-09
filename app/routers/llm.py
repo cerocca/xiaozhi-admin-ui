@@ -4,6 +4,7 @@ from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from app.config import settings
 from app.services.command_service import run_command
 from app.services.llm_service import (
     create_provider_profile,
@@ -119,7 +120,7 @@ def _save_llm(
 
     if restart and result.get("ok"):
         restart_result = run_command(
-            ["/home/ciru/xiaozhi-admin-ui/scripts/xserver.sh", "restart"],
+            [settings.xserver_script_path, "restart"],
             timeout=30,
         )
         result["restart_result"] = restart_result
@@ -211,7 +212,7 @@ def llm_save_and_restart_legacy(
 
     if result.get("ok"):
         restart_result = run_command(
-            ["/home/ciru/xiaozhi-admin-ui/scripts/xserver.sh", "restart"],
+            [settings.xserver_script_path, "restart"],
             timeout=30,
         )
         result["restart_result"] = restart_result
