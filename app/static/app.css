@@ -53,6 +53,11 @@ body {
   padding: 18px;
 }
 
+.card h2,
+.card h3 {
+  margin: 0;
+}
+
 pre {
   white-space: pre-wrap;
   word-break: break-word;
@@ -215,6 +220,9 @@ button {
   border-radius: 10px;
   padding: 10px 14px;
   cursor: pointer;
+  font: inherit;
+  line-height: 1.2;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
 }
 
 button:hover {
@@ -234,13 +242,31 @@ button:hover {
 }
 
 .button-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: #334155;
   color: white;
   text-decoration: none;
   border-radius: 10px;
   padding: 10px 14px;
-  margin-right: 8px;
+  font: inherit;
+  line-height: 1.2;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.button-link:hover {
+  opacity: 0.92;
+}
+
+.button-danger {
+  background: #7f1d1d;
+  color: #fee2e2;
+}
+
+.button-danger:hover {
+  background: #641717;
+  opacity: 1;
 }
 
 .back-link {
@@ -318,6 +344,10 @@ button:hover {
 .muted {
   color: var(--muted);
   margin-top: 4px;
+}
+
+.section-title {
+  margin: 0;
 }
 
 .status-grid {
@@ -428,6 +458,7 @@ textarea {
 .ai-stack-card {
   display: flex;
   flex-direction: column;
+  min-height: 100%;
 }
 
 .ai-stack-section {
@@ -448,6 +479,19 @@ textarea {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.ai-stack-intro {
+  margin-top: 8px;
+}
+
+.ai-stack-grid {
+  margin-top: 0;
+}
+
+.ai-stack-description {
+  margin: 12px 0 0;
+  flex: 1 1 auto;
 }
 
 .ai-stack-badges {
@@ -490,12 +534,52 @@ textarea {
 
 .ai-stack-card-actions {
   margin-top: auto;
+  padding-top: 16px;
 }
 
 .ai-stack-card .button-link {
   width: 100%;
-  margin-right: 0;
   text-align: center;
+}
+
+.dashboard-grid {
+  align-items: stretch;
+}
+
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.dashboard-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.dashboard-card-summary {
+  margin: 12px 0 0;
+  min-height: 44px;
+  color: var(--muted);
+}
+
+.dashboard-card-content {
+  margin: 16px 0 0;
+  flex: 1 1 auto;
+  min-height: 180px;
+}
+
+.dashboard-card-actions {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-card-actions-row {
+  margin-top: 0;
 }
 
 .devices-table code {
