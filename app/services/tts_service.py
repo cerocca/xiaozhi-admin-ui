@@ -30,6 +30,10 @@ TTS_PRESETS = {
     },
 }
 
+TTS_VOICE_OPTIONS = {
+    "piper": ["riccardo"],
+}
+
 PROFILE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
@@ -144,13 +148,17 @@ def _guess_provider(profile_name, block):
     model = _get_model(block).lower()
     endpoint = _get_endpoint(block).lower()
 
-    for key in ("provider", "provider_name", "type"):
+    for key in ("provider", "provider_name"):
         value = str(block.get(key, "") or "").strip()
         if value:
             return value
 
     if model == "piper" or "piper" in endpoint or "8091" in endpoint:
         return "piper"
+
+    type_value = str(block.get("type", "") or "").strip()
+    if type_value:
+        return type_value
 
     return str(profile_name or "").strip()
 
@@ -214,12 +222,20 @@ def _build_profile_summary(profile_name, block, active_profile_name):
 
 
 def _build_form_data(summary):
+    provider = str(summary.get("provider", "") or "").strip().lower()
+    voice_options = list(TTS_VOICE_OPTIONS.get(provider, []))
+    current_voice = str(summary.get("voice", "") or "").strip()
+    if current_voice and current_voice not in voice_options:
+        voice_options.append(current_voice)
+
     return {
         "profile_name": summary.get("profile_name", ""),
+        "provider": provider,
         "type": summary.get("type", "") or "openai",
         "endpoint": summary.get("endpoint", ""),
         "model": summary.get("model", ""),
-        "voice": summary.get("voice", ""),
+        "voice": current_voice,
+        "voice_options": voice_options,
         "speed": summary.get("speed", ""),
         "has_api_key": summary.get("has_api_key", False),
         "requires_api_key": summary.get("requires_api_key", False),
@@ -233,6 +249,7 @@ def _default_selected_profile():
     preset = TTS_PRESETS["piper_local"]
     return {
         "profile_name": "",
+        "provider": "piper",
         "type": preset["type"],
         "endpoint": preset["endpoint"],
         "model": preset["model"],

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 
 from app.services.asr_service import get_active_asr
+from app.services.health_service import get_health_status
 from app.services.llm_service import get_active_llm
 from app.services.status_service import get_dashboard_status
 from app.services.tts_service import get_active_tts
@@ -98,7 +99,6 @@ def _build_ui_badges(slug: str) -> list[dict]:
 
         if active.get("is_local_piper"):
             badges.append(_status_badge("LOCALE", "info"))
-            badges.append(_status_badge("PIPER", "info"))
         else:
             scope_badge = _classify_endpoint_scope(endpoint)
             if scope_badge:
@@ -106,6 +106,19 @@ def _build_ui_badges(slug: str) -> list[dict]:
         return badges
 
     return []
+
+
+def _build_runtime_badge(slug: str, health_status: dict) -> dict:
+    value = str(health_status.get(slug, "") or "").strip().lower()
+
+    if slug == "device":
+        if value == "connected":
+            return {"label": "CONNECTED", "kind": "ok"}
+        return {"label": "DISCONNECTED", "kind": "err"}
+
+    if value == "ok":
+        return {"label": "OK", "kind": "ok"}
+    return {"label": "ERROR", "kind": "err"}
 
 
 @router.get("/")
@@ -124,6 +137,7 @@ def dashboard(request: Request):
 
 @router.get("/ai")
 def ai_stack_index(request: Request):
+    health_status = get_health_status()
     ui_items = [
         {
             "title": "LLM",
@@ -131,7 +145,8 @@ def ai_stack_index(request: Request):
             "slug": "llm",
             "description": "Generazione delle risposte (modello e profili)",
             "active_profile": str(get_active_llm().get("profile_name", "") or "").strip(),
-            "badges": _build_ui_badges("llm"),
+            "config_badges": _build_ui_badges("llm"),
+            "runtime_badge": _build_runtime_badge("llm", health_status),
         },
         {
             "title": "ASR",
@@ -139,7 +154,8 @@ def ai_stack_index(request: Request):
             "slug": "asr",
             "description": "Speech -> text (riconoscimento vocale)",
             "active_profile": str(get_active_asr().get("profile_name", "") or "").strip(),
-            "badges": _build_ui_badges("asr"),
+            "config_badges": _build_ui_badges("asr"),
+            "runtime_badge": _build_runtime_badge("asr", health_status),
         },
         {
             "title": "TTS",
@@ -147,9 +163,15 @@ def ai_stack_index(request: Request):
             "slug": "tts",
             "description": "Text -> speech (sintesi vocale)",
             "active_profile": str(get_active_tts().get("profile_name", "") or "").strip(),
-            "badges": _build_ui_badges("tts"),
+            "config_badges": _build_ui_badges("tts"),
+            "runtime_badge": _build_runtime_badge("tts", health_status),
         },
     ]
+    device_item = {
+        "title": "Device",
+        "description": "Stato runtime del device collegato al backend Xiaozhi.",
+        "runtime_badge": _build_runtime_badge("device", health_status),
+    }
     readonly_items = [
         {
             "title": "VAD",
@@ -189,6 +211,7 @@ def ai_stack_index(request: Request):
             "request": request,
             "page_title": "AI Stack",
             "ui_items": ui_items,
+            "device_item": device_item,
             "readonly_items": readonly_items,
         },
     )

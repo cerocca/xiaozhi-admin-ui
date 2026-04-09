@@ -191,7 +191,18 @@
       </div>
       <div>
         <label for="voice">Voice</label>
-        <input type="text" id="voice" name="voice" value="{{ selected.voice }}" required autocomplete="off">
+        {% if selected.voice_options and selected.voice_options|length > 0 %}
+          <select id="voice" name="voice" required>
+            {% for voice_name in selected.voice_options %}
+              <option value="{{ voice_name }}" {% if selected.voice == voice_name %}selected{% endif %}>{{ voice_name }}</option>
+            {% endfor %}
+          </select>
+          <div class="muted" style="margin-top: 6px;">
+            Lista statica disponibile per il provider corrente.
+          </div>
+        {% else %}
+          <input type="text" id="voice" name="voice" value="{{ selected.voice }}" required autocomplete="off">
+        {% endif %}
       </div>
       <div>
         <label for="speed">Speed</label>
