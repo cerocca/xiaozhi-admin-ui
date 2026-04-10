@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-XIAOZHI_DIR="/home/ciru/xiaozhi-esp32-lightserver"
+XIAOZHI_DIR="${XIAOZHI_DIR:-/home/ciru/xiaozhi-esp32-lightserver}"
 
 case "$1" in
   restart)

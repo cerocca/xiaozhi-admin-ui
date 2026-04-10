@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SERVICE="piper-api"
+SERVICE="${PIPER_SERVICE_NAME:-piper-api}"
 
 case "$1" in
   restart)

@@ -75,42 +75,67 @@ Vedi `requirements.txt`.
 - `/devices`: vista device runtime
 
 ## Avvio rapido
-Esempio generico:
+Happy path su Linux server standard:
 
 ```bash
-git clone <REPO_URL> /home/<user>/xiaozhi-admin-ui
-cd /home/<user>/xiaozhi-admin-ui
+git clone <REPO_URL> /home/xiaozhi/xiaozhi-admin-ui
+cd /home/xiaozhi/xiaozhi-admin-ui
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port <ADMIN_UI_PORT>
+cp .env.example .env
+uvicorn app.main:app --host 0.0.0.0 --port 8088
 ```
 
-Apri poi:
+Prima di avviare, modifica in `.env` almeno:
+- `XIAOZHI_DIR`
+- `XIAOZHI_CONFIG`
+
+Nota:
+- l'esempio usa `/home/xiaozhi/...`, ma `XIAOZHI_DIR` va sempre verificato sul server reale
+- `scripts/xserver.sh` mantiene un fallback interno per compatibilita, ma non va considerato un valore universale
+
+Apri poi la UI:
 
 ```text
-http://<SERVER_IP>:<ADMIN_UI_PORT>
+http://<SERVER_IP>:8088
 ```
 
-Per una guida completa e replicabile vedi `SETUP.md`.
+Per una guida completa, copy-paste friendly e con verifica finale vedi `SETUP.md`.
 
-## Limiti reali da conoscere
-Il repository non e ancora completamente indipendente dall'host.
+## Configurazione
+Da verificare sempre:
+- `XIAOZHI_DIR`
+- `XIAOZHI_CONFIG`
+- il path deve corrispondere al backend reale presente sulla macchina
 
-Valori configurabili via `.env`:
-- host e porta UI
-- path backend Xiaozhi
-- path file config
-- health URL di Piper
-- nome servizio systemd di Piper
+Da modificare se il setup lo richiede:
+- `ADMIN_UI_HOST`
+- `ADMIN_UI_PORT`
+- `BACKEND_HOST`
+- `BACKEND_HEALTH_PORT`
+- `PIPER_SERVICE_NAME`
 
-Valori ancora hardcoded nel codice o negli script:
-- path di alcuni wrapper script
-- directory backend usata da `scripts/xserver.sh`
-- URL backend usato per `/api/health`
-- alcuni default in `app/config.py`
+Opzionale, con default gia sensati:
+- `XSERVER_SCRIPT_PATH`
+- `PIPER_SCRIPT_PATH`
+- `XSERVER_SERVICE_NAME`
+- `PIPER_HEALTH_URL`
+- `LAN_CIDR`
 
-Questo significa che un deploy su un altro server e possibile, ma oggi va fatto seguendo la sezione "Adattamenti obbligatori" in `SETUP.md`.
+I default gia funzionanti coprono il caso comune:
+- script wrapper sotto `scripts/`
+- Piper health su `http://127.0.0.1:8091/health`
+- LAN `192.168.1.0/24`
+- `XSERVER_SCRIPT_PATH` usa lo script del repo corrente
+- `scripts/xserver.sh` mantiene anche un fallback interno di compatibilita per `XIAOZHI_DIR`, ma per un nuovo setup e meglio impostarlo esplicitamente in `.env`
+
+## Verifica rapida
+Installazione ok se:
+- la UI risponde su `http://<SERVER_IP>:<ADMIN_UI_PORT>`
+- `curl -s http://127.0.0.1:<BACKEND_HEALTH_PORT>/api/health` risponde dal server UI
+- la dashboard si apre senza errori bloccanti
+- stato `device disconnected` senza device connessi non e un errore
 
 ## Documenti del repo
 - `SETUP.md`: installazione da zero, systemd, troubleshooting

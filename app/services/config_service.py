@@ -9,10 +9,10 @@ from pathlib import Path
 
 import yaml
 
-from app.config import settings
+from app.config import BASE_DIR, settings
 
 
-BACKUP_DIR = Path("/home/ciru/xiaozhi-admin-ui/data/backups/config")
+BACKUP_DIR = BASE_DIR / "data" / "backups" / "config"
 
 
 def get_config_path() -> Path:
