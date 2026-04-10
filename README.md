@@ -1,6 +1,7 @@
 # Xiaozhi Admin UI
 
-Admin UI minimale per gestire e osservare un server Xiaozhi ESP32 in ambiente LAN.
+Admin UI minimale per gestire e osservare un server Xiaozhi ESP32 — vedi [Requisiti](#requisiti) — in ambiente LAN.  
+Per installazione completa e guida passo-passo vedi [`SETUP.md`](SETUP.md).
 
 ---
 
@@ -74,8 +75,7 @@ http://<SERVER_IP>:8088
 ## Requisiti
 
 - backend Xiaozhi compatibile già funzionante  
-  (es. [xiaozhi-esp32-lightserver](https://github.com/cerocca/xiaozhi-esp32-lightserver)  
-   oppure [xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server))
+  (es. [xiaozhi-esp32-lightserver](https://github.com/cerocca/xiaozhi-esp32-lightserver) oppure [xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server))
 
 - accesso locale a:
   - repository backend
@@ -84,7 +84,7 @@ http://<SERVER_IP>:8088
 - Docker (per backend)
 - Piper opzionale
 
-**Nota:**
+**Nota:**  
 la UI è stata sviluppata e testata principalmente con `xiaozhi-esp32-lightserver`.  
 Altri backend compatibili con `/api/health` dovrebbero funzionare, ma non sono garantiti.
 
