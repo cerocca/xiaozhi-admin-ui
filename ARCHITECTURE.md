@@ -139,7 +139,7 @@ Uso pratico:
 - evita di assumere che config corretta significhi runtime sano
 
 Limite attuale:
-- l'URL del backend health non e ancora completamente parametrizzato via `.env`
+- l'URL del backend health e configurabile via `.env`, ma va comunque verificato in caso di deploy su host o porte diversi
 - per un deploy su un altro server va verificato e, se necessario, aggiornato nel codice
 
 ## 9. Moduli AI

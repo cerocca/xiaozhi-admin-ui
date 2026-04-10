@@ -13,53 +13,64 @@ Completato:
 - Integrazione Piper TTS
 - Runtime health reale backend
 - Device runtime (connected/disconnected)
+- Tab Devices già presente
 - Versioning UI + footer + repo link
 - CHANGELOG.md iniziale
 
 ---
 
-## 🚀 Priorità alta (prossimi step)
+## 🚀 Priorità alta (v0.2.0)
 
-### 1. Migliorare runtime health UI
-Obiettivo: rendere il debug ancora più immediato
+### UI Health UX (focus principale)
+Obiettivo: rendere lo stato runtime immediato, chiaro e non ambiguo
 
-- [ ] Pulsante manuale "Refresh health"
-- [ ] Timestamp ultimo controllo
-- [ ] Distinguere:
-  - backend health non raggiungibile
-  - modulo runtime in errore
-- [ ] Gestione fallback visiva (es. badge "UNKNOWN")
+- [ ] Rendere esplicito lo stato:
+  - LLM / ASR / TTS / DEVICE
+- [ ] Distinguere chiaramente:
+  - backend non raggiungibile
+  - modulo in errore
+- [ ] Device:
+  - connected → positivo
+  - disconnected → neutro (non errore)
+- [ ] Usare `details` solo come contesto (endpoint, http_status, reason)
+- [ ] Fallback visivo (es. UNKNOWN) se health non disponibile
 
 ---
 
-### 2. Device details
-Obiettivo: capire davvero cosa fa il device
+## 🟡 Priorità media
 
-- [ ] Pagina dedicata Device
-- [ ] Last seen
+### Device details (miglioramento tab esistente)
+Obiettivo: maggiore visibilità runtime
+
+- [ ] Mostrare Last seen
 - [ ] Stato websocket più dettagliato
-- [ ] Eventuali info device (ID, IP, firmware se disponibile)
+- [ ] Info device (ID, IP, firmware se disponibile)
+- [ ] Migliorare leggibilità stato device nella tab esistente
 
 ---
 
-### 3. Logs più utili
+### Logs più utili
 Obiettivo: debug rapido senza SSH
 
 - [ ] Filtro per servizio (xserver / piper)
 - [ ] Selezione numero righe
-- [ ] Evidenziazione errori (facoltativo, no JS complesso)
+- [ ] Evidenziazione errori (senza JS complesso)
 
 ---
 
-## ⚙️ Operatività
+### Operatività
 
-### Config
+#### Config
 - [ ] Export config (download YAML)
 - [ ] Import config (upload YAML)
 - [ ] Diff prima del salvataggio (preview modifiche)
 
-### Backup
+#### Backup
 - [ ] Retention policy (es. ultimi N backup)
+
+---
+
+## 🟢 Priorità bassa / futura
 
 ### Device tracking
 - [ ] Storico connessioni
@@ -67,32 +78,29 @@ Obiettivo: debug rapido senza SSH
 
 ---
 
-## 🔐 Sicurezza (LAN-first)
-
+### Sicurezza (LAN-first)
 - [ ] Basic Auth per Admin UI
 - [ ] Audit log azioni admin (restart/stop/config)
 - [ ] Reverse proxy opzionale (nginx/caddy)
-- [ ] Hardening systemd (restart policy, limits)
+- [ ] Hardening systemd
 
 ---
 
-## 🎨 UX / UI polish
-
-- [ ] Microcopy migliorata (messaggi chiari)
-- [ ] Miglioramento responsive (mobile base)
-- [ ] Piccoli allineamenti visivi se emergono
+### UX / UI polish
+- [ ] Microcopy migliorata
+- [ ] Responsive base (mobile)
+- [ ] Allineamenti visivi minori
 
 ---
 
-## 📚 Documentazione
-
+### Documentazione
 - [ ] Setup completo da zero (Sibilla)
 - [ ] Documentare:
   - path
   - permessi
   - servizi systemd
 - [ ] Aggiornare docs insieme alle feature
-- [ ] Aggiungere note per troubleshooting reale
+- [ ] Troubleshooting reale
 
 ---
 
@@ -112,3 +120,4 @@ Obiettivo: debug rapido senza SSH
 - No JS complesso
 - Debug reale > UI decorativa
 - Patch incrementali, no refactor massivi
+
