@@ -7,7 +7,6 @@ Questa guida copre il percorso più semplice per installare `xiaozhi-admin-ui` s
 ## 1. Prerequisiti
 
 Serve già avere:
-
 - Linux con accesso shell
 - `git`
 - Python 3 con `venv`
@@ -17,12 +16,10 @@ Serve già avere:
 - Piper opzionale
 
 Backend compatibili (esempi):
-
 - `xiaozhi-esp32-lightserver`
 - `xiaozhi-esp32-server`
 
 Requisito fondamentale:
-
 - endpoint `/api/health` disponibile e funzionante
 
 ---
@@ -93,13 +90,11 @@ PIPER_SERVICE_NAME=piper-api
 ## 5. Configurazione: cosa verificare davvero
 
 Da verificare sempre:
-
 - `XIAOZHI_DIR`
 - `XIAOZHI_CONFIG`
 - devono corrispondere ai path reali del backend presente sulla macchina
 
 Da modificare se il setup lo richiede:
-
 - `ADMIN_UI_HOST`
 - `ADMIN_UI_PORT`
 - `BACKEND_HOST`
@@ -107,7 +102,6 @@ Da modificare se il setup lo richiede:
 - `PIPER_SERVICE_NAME`
 
 Opzionale, con default già sensati:
-
 - `XSERVER_SCRIPT_PATH`
 - `PIPER_SCRIPT_PATH`
 - `XSERVER_SERVICE_NAME`
@@ -115,7 +109,6 @@ Opzionale, con default già sensati:
 - `LAN_CIDR`
 
 Default già funzionanti se non li imposti:
-
 - `XSERVER_SCRIPT_PATH` e `PIPER_SCRIPT_PATH` puntano agli script nella directory del repo corrente
 - `PIPER_HEALTH_URL` usa `http://127.0.0.1:8091/health`
 - `LAN_CIDR` usa `192.168.1.0/24`
@@ -123,7 +116,6 @@ Default già funzionanti se non li imposti:
 - `scripts/xserver.sh` mantiene un fallback interno per `XIAOZHI_DIR`, ma per un nuovo setup è meglio impostarlo esplicitamente
 
 Note pratiche:
-
 - `ADMIN_UI_HOST=0.0.0.0` è il valore più semplice per esporre la UI in LAN
 - `BACKEND_HOST` e `BACKEND_HEALTH_PORT` devono puntare all'endpoint `/api/health`
 - `XIAOZHI_CONFIG` deve essere scrivibile dall'utente che esegue la UI
@@ -158,7 +150,6 @@ curl -s http://127.0.0.1:8003/api/health
 Se la UI è bindata su un IP specifico di LAN, verifica quell'indirizzo.
 
 Controlli minimi in UI:
-
 - `/` raggiungibile
 - dashboard caricata
 - `/config` legge il file YAML reale
@@ -166,7 +157,6 @@ Controlli minimi in UI:
 - `/devices` si apre
 
 Note:
-
 - `device = disconnected` non è errore se nessun device è connesso
 - Piper può non essere attivo senza bloccare la UI
 
@@ -175,7 +165,6 @@ Note:
 ## 8. systemd (opzionale ma consigliato)
 
 File:
-
 ```
 /etc/systemd/system/xiaozhi-admin-ui.service
 ```
@@ -213,7 +202,6 @@ journalctl -u xiaozhi-admin-ui -f
 ## 9. Porte
 
 Porte tipiche:
-
 - Admin UI: `8088`
 - backend health: `8003`
 - Piper health: `8091`
@@ -252,7 +240,6 @@ source ~/.bashrc
 ## 11. Checklist finale
 
 Considera l'installazione riuscita se:
-
 - la UI è raggiungibile su `http://<SERVER_IP>:<ADMIN_UI_PORT>`
 - `/api/health` risponde correttamente
 - la dashboard non mostra errori bloccanti
