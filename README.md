@@ -122,7 +122,7 @@ Other backends exposing `/api/health` may work but are not guaranteed.
 
 ## Project status
 
-- `v0.1.x` → stable and usable  
+- `v0.1.5` → stable and usable  
 - next → incremental improvements (devices, logs, config UX)  
 
 ---
