@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-    admin_ui_version: str = "0.2.0"
+    admin_ui_version: str = "0.1.5"
     admin_ui_repo_url: str = "https://github.com/cerocca/xiaozhi-admin-ui"
 
     admin_ui_host: str = "192.168.1.69"
