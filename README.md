@@ -45,6 +45,24 @@ For full installation and step-by-step guide see [`SETUP.md`](SETUP.md).
 
 ---
 
+## Requirements
+
+- A working Xiaozhi-compatible backend  
+  (e.g. https://github.com/cerocca/xiaozhi-esp32-lightserver or https://github.com/xinnan-tech/xiaozhi-esp32-server)
+
+- Local access to:
+  - backend repository  
+  - configuration files  
+
+- Docker (for backend)  
+- Piper (optional)  
+
+**Note:**  
+This UI is primarily tested with `xiaozhi-esp32-lightserver`.  
+Other backends exposing `/api/health` may work but are not guaranteed.
+
+---
+
 ## Runtime Health
 
 The Admin UI uses the backend `/api/health` endpoint as the single source of truth.
@@ -95,23 +113,6 @@ http://<SERVER_IP>:8088
 
 ---
 
-## Requirements
-
-- A working Xiaozhi-compatible backend  
-  (e.g. https://github.com/cerocca/xiaozhi-esp32-lightserver or https://github.com/xinnan-tech/xiaozhi-esp32-server)
-
-- Local access to:
-  - backend repository  
-  - configuration files  
-
-- Docker (for backend)  
-- Piper (optional)  
-
-**Note:**  
-This UI is primarily tested with `xiaozhi-esp32-lightserver`.  
-Other backends exposing `/api/health` may work but are not guaranteed.
-
----
 
 ## Repository docs
 
