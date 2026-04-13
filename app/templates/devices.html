@@ -44,7 +44,7 @@
               {% if d.status == "connected" %}
                 <span class="badge ok">connected</span>
               {% elif d.status == "disconnected" %}
-                <span class="badge err">disconnected</span>
+                <span class="badge muted">disconnected</span>
               {% else %}
                 <span class="badge">{{ d.status }}</span>
               {% endif %}
