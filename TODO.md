@@ -1,123 +1,67 @@
 # TODO – Xiaozhi Admin UI
 
-## 🎯 Stato attuale
+## For v0.2.0
 
-La Admin UI è stabile e utilizzabile in produzione LAN.
+### 🟡 Medium priority
 
-Completato:
-- Dashboard operativa (status, restart/stop/log)
-- AI Stack con distinzione chiara:
-  - Config (statico)
-  - Runtime (/api/health)
-- Configurazione LLM / ASR / TTS via UI
-- Integrazione Piper TTS
-- Runtime health reale backend
-- Device runtime (connected/disconnected)
-- Tab Devices già presente
-- Versioning UI + footer + repo link
-- CHANGELOG.md iniziale
+#### Device runtime details (existing tab enhancement)
+Goal: greater runtime visibility
 
----
+- [ ] Show last seen
+- [ ] More detailed WebSocket status
+- [ ] Device info (ID, IP, firmware if available)
+- [ ] Improve readability of device status in the existing tab
 
-## 🚀 Priorità alta (v0.2.0)
+#### More useful logs
+Goal: fast debugging without SSH
 
-### UI Health UX (focus principale)
-Obiettivo: rendere lo stato runtime immediato, chiaro e non ambiguo
+- [ ] Filter by service (xserver / piper)
+- [ ] Select number of lines
+- [ ] Error highlighting (server-side or minimal JS)
 
-- [ ] Rendere esplicito lo stato:
-  - LLM / ASR / TTS / DEVICE
-- [ ] Distinguere chiaramente:
-  - backend non raggiungibile
-  - modulo in errore
-- [ ] Device:
-  - connected → positivo
-  - disconnected → neutro (non errore)
-- [ ] Usare `details` solo come contesto (endpoint, http_status, reason)
-- [ ] Fallback visivo (es. UNKNOWN) se health non disponibile
+#### Operations
 
----
-
-## 🟡 Priorità media
-
-### Device details (miglioramento tab esistente)
-Obiettivo: maggiore visibilità runtime
-
-- [ ] Mostrare Last seen
-- [ ] Stato websocket più dettagliato
-- [ ] Info device (ID, IP, firmware se disponibile)
-- [ ] Migliorare leggibilità stato device nella tab esistente
-
----
-
-### Logs più utili
-Obiettivo: debug rapido senza SSH
-
-- [ ] Filtro per servizio (xserver / piper)
-- [ ] Selezione numero righe
-- [ ] Evidenziazione errori (senza JS complesso)
-
----
-
-### Operatività
-
-#### Config
+##### Config
 - [ ] Export config (download YAML)
 - [ ] Import config (upload YAML)
-- [ ] Diff prima del salvataggio (preview modifiche)
+- [ ] Diff before saving (changes preview)
 
-#### Backup
-- [ ] Retention policy (es. ultimi N backup)
-
----
-
-## 🟢 Priorità bassa / futura
-
-### Device tracking
-- [ ] Storico connessioni
-- [ ] Persistenza base (SQLite leggera)
+##### Backup
+- [ ] Retention policy (e.g. latest N backups)
 
 ---
 
-### Sicurezza (LAN-first)
-- [ ] Basic Auth per Admin UI
-- [ ] Audit log azioni admin (restart/stop/config)
-- [ ] Reverse proxy opzionale (nginx/caddy)
+### 🟢 Low priority / future
+
+#### Device tracking
+- [ ] Connection history
+- [ ] Basic persistence (lightweight SQLite)
+
+#### Security (LAN-first)
+- [ ] Basic Auth for Admin UI
+- [ ] Audit log for admin actions (restart/stop/config)
+- [ ] Optional reverse proxy (nginx/caddy)
 - [ ] Hardening systemd
 
----
+#### UX / UI polish
+- [ ] Improved microcopy
+- [ ] Basic responsive layout (mobile)
+- [ ] Minor visual alignments
 
-### UX / UI polish
-- [ ] Microcopy migliorata
-- [ ] Responsive base (mobile)
-- [ ] Allineamenti visivi minori
-
----
-
-### Documentazione
-- [ ] Setup completo da zero (Sibilla)
-- [ ] Documentare:
-  - path
-  - permessi
-  - servizi systemd
-- [ ] Aggiornare docs insieme alle feature
-- [ ] Troubleshooting reale
+#### Documentation
+- [ ] Complete setup from zero (Sibilla)
+- [ ] Document:
+  - paths
+  - permissions
+  - systemd services
+- [ ] Align docs with real features (no drift)
+- [ ] Troubleshooting section based on real cases
 
 ---
 
-## ❌ Fuori scope (per ora)
+## ❌ Out of scope (for now)
 
-- Routing LLM avanzato
-- Auto-refresh / polling continuo
-- Refactor architetturali
+- Advanced LLM routing
+- Continuous auto-refresh / polling
+- Architectural refactors
 - Firmware / device logic
-
----
-
-## 🧭 Linee guida progetto
-
-- Semplicità > feature
-- Server-rendered (no SPA)
-- No JS complesso
-- Debug reale > UI decorativa
-- Patch incrementali, no refactor massivi
-

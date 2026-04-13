@@ -1,40 +1,63 @@
 # Xiaozhi Admin UI
 
-Admin UI minimale per gestire e osservare un server Xiaozhi ESP32 — vedi [Requisiti](#requisiti) — in ambiente LAN.  
-Per installazione completa e guida passo-passo vedi [`SETUP.md`](SETUP.md).
+![Status](https://img.shields.io/badge/status-stable-green)
+![UI](https://img.shields.io/badge/UI-server--rendered-lightgrey)
+![Backend](https://img.shields.io/badge/backend-xiaozhi-blue)
+![Health](https://img.shields.io/badge/runtime-health%20API-blue)
+![Device](https://img.shields.io/badge/device-ESP32--S3-lightgrey)
+![Scope](https://img.shields.io/badge/scope-LAN--only-orange)
+
+Minimal Admin UI to manage and observe a Xiaozhi ESP32 server in a LAN environment.  
+For full installation and step-by-step guide see [`SETUP.md`](SETUP.md).
 
 ---
 
-## Cosa fa
+## What it does
 
-- Dashboard con stato servizi:
+- Dashboard with runtime status:
   - LLM
   - ASR
   - TTS
   - device (connected / disconnected)
 
-- Integrazione health runtime reale del backend tramite `/api/health`
+- Real runtime health integration via `/api/health`
 
-- Configurazione:
+- Configuration:
   - LLM
   - ASR
   - TTS
 
-- Visualizzazione moduli read-only:
+- Read-only modules:
   - VAD
   - Intent
   - Memory
 
-- Accesso ai log (backend e Piper)
+- Logs access (backend and Piper)
 
-- Azioni operative:
+- Operational actions:
   - restart
   - logs
 
-Obiettivo:
-- debug reale
-- semplicità
-- zero overengineering
+**Goal:**
+- real debugging  
+- simplicity  
+- zero overengineering  
+
+---
+
+## Runtime Health
+
+The Admin UI uses the backend `/api/health` endpoint as the single source of truth.
+
+- Top-level fields (`llm`, `asr`, `tts`, `device`) define the primary state  
+- `details` are optional and shown only as secondary context  
+- The UI never infers state from `details`  
+- If the health endpoint is unavailable, the UI shows an `UNKNOWN` state  
+- Device `disconnected` is treated as a neutral state, not an error  
+
+This ensures a clear distinction between:
+- module errors (backend reachable, component failing)  
+- backend unreachable (no reliable runtime data)  
 
 ---
 
@@ -51,20 +74,20 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Modifica almeno:
+Edit at least:
 
 ```env
 XIAOZHI_DIR=...
 XIAOZHI_CONFIG=...
 ```
 
-Avvia:
+Run:
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8088
 ```
 
-Apri:
+Open:
 
 ```text
 http://<SERVER_IP>:8088
@@ -72,43 +95,41 @@ http://<SERVER_IP>:8088
 
 ---
 
-## Requisiti
+## Requirements
 
-- backend Xiaozhi compatibile già funzionante  
-  (es. [xiaozhi-esp32-lightserver](https://github.com/cerocca/xiaozhi-esp32-lightserver) oppure [xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server))
+- A working Xiaozhi-compatible backend  
+  (e.g. https://github.com/cerocca/xiaozhi-esp32-lightserver or https://github.com/xinnan-tech/xiaozhi-esp32-server)
 
-- accesso locale a:
-  - repository backend
-  - file di configurazione
+- Local access to:
+  - backend repository  
+  - configuration files  
 
-- Docker (per backend)
-- Piper opzionale
+- Docker (for backend)  
+- Piper (optional)  
 
-**Nota:**  
-la UI è stata sviluppata e testata principalmente con `xiaozhi-esp32-lightserver`.  
-Altri backend compatibili con `/api/health` dovrebbero funzionare, ma non sono garantiti.
-
----
-
-## Documenti del repo
-
-- `SETUP.md` → installazione completa da zero (consigliato)
-- `ARCHITECTURE.md` → struttura del progetto e componenti
-- `PROJECT_RULES.md` → linee guida e vincoli
-- `CHANGELOG.md` → versioni e modifiche
+**Note:**  
+This UI is primarily tested with `xiaozhi-esp32-lightserver`.  
+Other backends exposing `/api/health` may work but are not guaranteed.
 
 ---
 
-## Stato progetto
+## Repository docs
 
-- `v0.1.x` → stabile e utilizzabile
-- `v0.2.0` → in sviluppo (focus su UX e health clarity)
+- [`SETUP.md`](SETUP.md) → full installation guide (recommended)  
+- [`CHANGELOG.md`](CHANGELOG.md) → versions and changes  
 
 ---
 
-## Filosofia
+## Project status
 
-- Server-rendered (no SPA)
-- No JavaScript complesso
-- Debug reale > UI decorativa
-- Patch incrementali, no refactor massivi
+- `v0.1.x` → stable and usable  
+- next → incremental improvements (devices, logs, config UX)  
+
+---
+
+## Philosophy
+
+- Server-rendered (no SPA)  
+- No complex JavaScript  
+- Real debugging > UI decoration  
+- Incremental patches, no massive refactors  

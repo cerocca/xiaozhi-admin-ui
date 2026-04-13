@@ -21,3 +21,7 @@ data/backups/config/*
 *~
 *.swp
 *.swo
+
+#file miei di progetto
+ARCHITECTURE.md
+PROJECT_RULES.md

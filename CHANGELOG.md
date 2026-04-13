@@ -1,34 +1,48 @@
 # Changelog
 
-Tutte le modifiche rilevanti della Admin UI vengono annotate qui.
+All relevant Admin UI changes are recorded here.
 
 ## [Unreleased]
 
-- Miglioramento UX della sezione Health (chiarezza stato LLM / ASR / TTS / device).
-- Uso più esplicito dei dettagli (`details`) come contesto e non come stato primario.
-- Miglioramento della semantica device (connected vs disconnected).
+---
+
+## [0.1.5]
+
+### Improvements
+- UI Health UX completed:
+  - clear distinction between module error and backend unreachable
+  - UNKNOWN state when health is unavailable
+  - device disconnected is now neutral (not an error)
+  - details displayed as secondary context only
+
+### Fixes
+- restored backward compatibility in health fallback payload
+- ensured top-level health fields are always present (llm/asr/tts/device)
+
+---
 
 ## [0.1.1]
 
-- Migliorata la portabilità della Admin UI tramite configurazione centralizzata.
-- Introduzione di `.env.example` per setup semplificato.
-- Rimozione di path hardcoded e uso consistente di settings/env.
-- Migliorata la documentazione (README e SETUP) per installazione da zero.
-- Correzioni ai wrapper script (`xserver.sh`, `piper.sh`) per supportare variabili da environment.
-- Migliorata la gestione dei path interni (backup, log, script) rispetto alla root del progetto.
+- Improved Admin UI portability through centralized configuration.
+- Introduced `.env.example` for simplified setup.
+- Removed hardcoded paths and used settings/env consistently.
+- Improved documentation (README and SETUP) for installation from zero.
+- Fixed wrapper scripts (`xserver.sh`, `piper.sh`) to support environment variables.
+- Improved handling of internal paths (backup, log, script) relative to the project root.
+
+---
 
 ## [0.1.0]
 
-- Prima milestone stabile della Admin UI server-rendered.
-- Dashboard iniziale con stato servizi principali e accesso rapido ai log.
-- Introduzione della sezione AI Stack per organizzare i moduli AI disponibili.
-- Configurazione base LLM con gestione profili principali.
-- Pagine core operative per config editor, backups, logs e devices.
-- Gestione iniziale di server Xiaozhi, Piper e configurazione runtime.
-
-- Aggiunta gestione CRUD completa per profili ASR e TTS.
-- Migliorata la pagina AI Stack con layout più coerente e card meglio allineate.
-- Integrazione iniziale della health runtime del backend Xiaozhi.
-- Aggiunta visualizzazione runtime del device nella UI.
-- Rifinitura della dashboard con azioni restart/stop/log più coerenti.
-- Migliorata l’esperienza configurativa TTS con supporto dropdown `voice` per provider come Piper.
+- First stable milestone of the server-rendered Admin UI.
+- Initial dashboard with main service status and quick access to logs.
+- Introduced the AI Stack section to organize the available AI modules.
+- Basic LLM configuration with main profile management.
+- Core operational pages for config editor, backups, logs, and devices.
+- Initial management of Xiaozhi server, Piper, and runtime configuration.
+- Added full CRUD management for ASR and TTS profiles.
+- Improved the AI Stack page with a more consistent layout and better aligned cards.
+- Initial integration of runtime health from the Xiaozhi backend.
+- Added runtime device visibility in the UI.
+- Refined the dashboard with more consistent restart/stop/log actions.
+- Improved the TTS configuration experience with dropdown `voice` support for providers like Piper.

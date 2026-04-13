@@ -109,16 +109,36 @@ def _build_ui_badges(slug: str) -> list[dict]:
 
 
 def _build_runtime_badge(slug: str, health_status: dict) -> dict:
+    if not health_status.get("health_available"):
+        return {"label": "UNKNOWN", "kind": "muted"}
+
     value = str(health_status.get(slug, "") or "").strip().lower()
 
     if slug == "device":
         if value == "connected":
             return {"label": "CONNECTED", "kind": "ok"}
-        return {"label": "DISCONNECTED", "kind": "err"}
+        return {"label": "DISCONNECTED", "kind": "muted"}
 
     if value == "ok":
         return {"label": "OK", "kind": "ok"}
     return {"label": "ERROR", "kind": "err"}
+
+
+def _build_runtime_detail(slug: str, health_status: dict) -> str:
+    details = health_status.get("details")
+    if not isinstance(details, dict):
+        return ""
+
+    value = details.get(slug)
+    if isinstance(value, dict):
+        parts = []
+        for key, item in value.items():
+            text = str(item or "").strip()
+            if text:
+                parts.append(f"{key}: {text}")
+        return " | ".join(parts)
+
+    return str(value or "").strip()
 
 
 @router.get("/")
@@ -147,6 +167,7 @@ def ai_stack_index(request: Request):
             "active_profile": str(get_active_llm().get("profile_name", "") or "").strip(),
             "config_badges": _build_ui_badges("llm"),
             "runtime_badge": _build_runtime_badge("llm", health_status),
+            "runtime_detail": _build_runtime_detail("llm", health_status),
         },
         {
             "title": "ASR",
@@ -156,6 +177,7 @@ def ai_stack_index(request: Request):
             "active_profile": str(get_active_asr().get("profile_name", "") or "").strip(),
             "config_badges": _build_ui_badges("asr"),
             "runtime_badge": _build_runtime_badge("asr", health_status),
+            "runtime_detail": _build_runtime_detail("asr", health_status),
         },
         {
             "title": "TTS",
@@ -165,12 +187,14 @@ def ai_stack_index(request: Request):
             "active_profile": str(get_active_tts().get("profile_name", "") or "").strip(),
             "config_badges": _build_ui_badges("tts"),
             "runtime_badge": _build_runtime_badge("tts", health_status),
+            "runtime_detail": _build_runtime_detail("tts", health_status),
         },
     ]
     device_item = {
         "title": "Device",
         "description": "Stato runtime del device collegato al backend Xiaozhi.",
         "runtime_badge": _build_runtime_badge("device", health_status),
+        "runtime_detail": _build_runtime_detail("device", health_status),
     }
     readonly_items = [
         {
@@ -210,6 +234,7 @@ def ai_stack_index(request: Request):
         {
             "request": request,
             "page_title": "AI Stack",
+            "health_message": str(health_status.get("health_message", "") or "").strip(),
             "ui_items": ui_items,
             "device_item": device_item,
             "readonly_items": readonly_items,

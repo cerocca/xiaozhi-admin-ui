@@ -6,6 +6,9 @@
   <div class="muted ai-stack-intro">
     Accesso rapido ai moduli AI, con distinzione tra quelli gestiti direttamente da UI e quelli consultabili solo in lettura.
   </div>
+  {% if health_message %}
+    <div class="muted" style="margin-top: 8px;">{{ health_message }}</div>
+  {% endif %}
 </section>
 
 <section class="card ai-stack-section ai-stack-section-managed">
@@ -39,6 +42,9 @@
           <span class="ai-stack-label">Runtime</span>
           <span class="badge {{ item.runtime_badge.kind }}">{{ item.runtime_badge.label }}</span>
         </div>
+        {% if item.runtime_detail %}
+          <div class="muted" style="margin-top: 6px;">{{ item.runtime_detail }}</div>
+        {% endif %}
         <div class="actions ai-stack-card-actions">
           <a class="button-link" href="{{ item.href }}">Apri {{ item.title }}</a>
         </div>
@@ -64,6 +70,9 @@
       </div>
     </div>
     <p class="muted ai-stack-description">{{ device_item.description }}</p>
+    {% if device_item.runtime_detail %}
+      <div class="muted" style="margin-top: 6px;">{{ device_item.runtime_detail }}</div>
+    {% endif %}
   </article>
 </section>
 

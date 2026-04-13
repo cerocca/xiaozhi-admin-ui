@@ -13,9 +13,15 @@ HEALTH_FALLBACK = {
 
 def _normalize_health_payload(payload) -> dict:
     if not isinstance(payload, dict):
-        return dict(HEALTH_FALLBACK)
+        return {
+            **HEALTH_FALLBACK,
+            "health_available": False,
+        }
 
-    normalized = dict(HEALTH_FALLBACK)
+    normalized = {
+        **HEALTH_FALLBACK,
+        "health_available": True,
+    }
     allowed = {
         "llm": {"ok", "error"},
         "asr": {"ok", "error"},
@@ -28,6 +34,10 @@ def _normalize_health_payload(payload) -> dict:
         if value in values:
             normalized[key] = value
 
+    details = payload.get("details")
+    if isinstance(details, dict):
+        normalized["details"] = details
+
     return normalized
 
 
@@ -38,4 +48,8 @@ def get_health_status() -> dict:
             response.raise_for_status()
             return _normalize_health_payload(response.json())
     except Exception:
-        return dict(HEALTH_FALLBACK)
+        return {
+            **HEALTH_FALLBACK,
+            "health_available": False,
+            "health_message": "Runtime health unavailable",
+        }

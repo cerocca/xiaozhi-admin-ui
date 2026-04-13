@@ -1,32 +1,33 @@
 # SETUP
 
-Questa guida copre il percorso più semplice per installare `xiaozhi-admin-ui` su un server Linux, con configurazione esplicita e pochi passaggi manuali.
+This guide covers the simplest path to install `xiaozhi-admin-ui` on a Linux server, with explicit configuration and minimal manual steps.
 
 ---
 
-## 1. Prerequisiti
+## 1. Prerequisites
 
-Serve già avere:
-- Linux con accesso shell
+You must already have:
+
+- Linux with shell access
 - `git`
-- Python 3 con `venv`
-- backend Xiaozhi funzionante
-- accesso al file config del backend
-- Docker e Docker Compose (per il backend)
-- Piper opzionale
+- Python 3 with `venv`
+- a working Xiaozhi backend
+- access to the backend config file
+- Docker and Docker Compose (for backend)
+- Piper (optional)
 
-Backend compatibili (esempi):
+Compatible backends (examples):
 - `xiaozhi-esp32-lightserver`
 - `xiaozhi-esp32-server`
 
-Requisito fondamentale:
-- endpoint `/api/health` disponibile e funzionante
+Critical requirement:
+- `/api/health` endpoint must be available and working
 
 ---
 
-## 2. Preflight backend (obbligatorio)
+## 2. Backend preflight (mandatory)
 
-Verifica che il backend sia realmente funzionante:
+Verify the backend is actually working:
 
 ```bash
 ls -ld /home/xiaozhi/xiaozhi-esp32-lightserver
@@ -38,9 +39,9 @@ docker compose ps
 curl -s http://127.0.0.1:8003/api/health
 ```
 
-Deve restituire JSON valido.
+This must return valid JSON.
 
-Se usi Piper:
+If using Piper:
 
 ```bash
 systemctl status piper-api --no-pager
@@ -49,7 +50,7 @@ curl -s http://127.0.0.1:8091/health
 
 ---
 
-## 3. Installazione
+## 3. Installation
 
 ```bash
 git clone https://github.com/cerocca/xiaozhi-admin-ui.git
@@ -62,15 +63,15 @@ pip install -r requirements.txt
 
 ---
 
-## 4. Configurazione `.env`
+## 4. Configuration (.env)
 
-Copia il file di esempio:
+Copy example file:
 
 ```bash
 cp .env.example .env
 ```
 
-Apri `.env` e modifica almeno queste variabili:
+Edit at least:
 
 ```env
 ADMIN_UI_HOST=0.0.0.0
@@ -87,42 +88,47 @@ PIPER_SERVICE_NAME=piper-api
 
 ---
 
-## 5. Configurazione: cosa verificare davvero
+## 5. What to verify (important)
 
-Da verificare sempre:
+Always verify:
+
 - `XIAOZHI_DIR`
 - `XIAOZHI_CONFIG`
-- devono corrispondere ai path reali del backend presente sulla macchina
 
-Da modificare se il setup lo richiede:
+They must match real backend paths on the machine.
+
+Adjust if needed:
+
 - `ADMIN_UI_HOST`
 - `ADMIN_UI_PORT`
 - `BACKEND_HOST`
 - `BACKEND_HEALTH_PORT`
 - `PIPER_SERVICE_NAME`
 
-Opzionale, con default già sensati:
+Optional (defaults are usually correct):
+
 - `XSERVER_SCRIPT_PATH`
 - `PIPER_SCRIPT_PATH`
 - `XSERVER_SERVICE_NAME`
 - `PIPER_HEALTH_URL`
 - `LAN_CIDR`
 
-Default già funzionanti se non li imposti:
-- `XSERVER_SCRIPT_PATH` e `PIPER_SCRIPT_PATH` puntano agli script nella directory del repo corrente
-- `PIPER_HEALTH_URL` usa `http://127.0.0.1:8091/health`
-- `LAN_CIDR` usa `192.168.1.0/24`
-- `XSERVER_SERVICE_NAME` ha default `xiaozhi-server`
-- `scripts/xserver.sh` mantiene un fallback interno per `XIAOZHI_DIR`, ma per un nuovo setup è meglio impostarlo esplicitamente
+Defaults:
 
-Note pratiche:
-- `ADMIN_UI_HOST=0.0.0.0` è il valore più semplice per esporre la UI in LAN
-- `BACKEND_HOST` e `BACKEND_HEALTH_PORT` devono puntare all'endpoint `/api/health`
-- `XIAOZHI_CONFIG` deve essere scrivibile dall'utente che esegue la UI
+- scripts paths point to repo-local scripts
+- Piper health defaults to `http://127.0.0.1:8091/health`
+- LAN_CIDR defaults to `192.168.1.0/24`
+- XSERVER_SERVICE_NAME defaults to `xiaozhi-server`
+
+Notes:
+
+- `ADMIN_UI_HOST=0.0.0.0` is the easiest option for LAN access
+- backend host/port must expose `/api/health`
+- config file must be writable by the UI user
 
 ---
 
-## 6. Avvio manuale
+## 6. Run manually
 
 ```bash
 cd /home/xiaozhi/xiaozhi-admin-ui
@@ -132,7 +138,7 @@ python -c "import app.main; print('import ok')"
 uvicorn app.main:app --host 0.0.0.0 --port 8088
 ```
 
-Apri nel browser:
+Open:
 
 ```
 http://<SERVER_IP>:8088
@@ -147,29 +153,31 @@ curl -I http://<SERVER_IP>:8088
 curl -s http://127.0.0.1:8003/api/health
 ```
 
-Se la UI è bindata su un IP specifico di LAN, verifica quell'indirizzo.
+UI checks:
 
-Controlli minimi in UI:
-- `/` raggiungibile
-- dashboard caricata
-- `/config` legge il file YAML reale
-- `/logs` mostra output backend e Piper
-- `/devices` si apre
+- `/` loads correctly
+- dashboard shows runtime status
+- `/config` reads real YAML
+- `/logs` shows backend and Piper output
+- `/devices` loads
 
-Note:
-- `device = disconnected` non è errore se nessun device è connesso
-- Piper può non essere attivo senza bloccare la UI
+Notes:
+
+- `device = disconnected` is normal if no device is connected
+- if `/api/health` is unreachable, UI shows `UNKNOWN` (not an error)
+- Piper is optional and does not block the UI
 
 ---
 
-## 8. systemd (opzionale ma consigliato)
+## 8. systemd (recommended)
 
 File:
+
 ```
 /etc/systemd/system/xiaozhi-admin-ui.service
 ```
 
-Contenuto:
+Content:
 
 ```ini
 [Unit]
@@ -188,7 +196,7 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-Attiva:
+Enable:
 
 ```bash
 sudo systemctl daemon-reload
@@ -199,12 +207,13 @@ journalctl -u xiaozhi-admin-ui -f
 
 ---
 
-## 9. Porte
+## 9. Ports
 
-Porte tipiche:
-- Admin UI: `8088`
-- backend health: `8003`
-- Piper health: `8091`
+Typical ports:
+
+- Admin UI: 8088
+- backend health: 8003
+- Piper health: 8091
 
 ```bash
 ss -ltnp | grep 8088
@@ -215,13 +224,13 @@ curl -s http://127.0.0.1:8091/health
 
 ---
 
-## 10. Helper CLI (opzionale)
+## 10. Optional CLI helpers
 
 ```bash
 nano ~/.bashrc
 ```
 
-Aggiungi:
+Add:
 
 ```bash
 alias ui-start="sudo systemctl start xiaozhi-admin-ui"
@@ -237,44 +246,45 @@ source ~/.bashrc
 
 ---
 
-## 11. Checklist finale
+## 11. Final checklist
 
-Considera l'installazione riuscita se:
-- la UI è raggiungibile su `http://<SERVER_IP>:<ADMIN_UI_PORT>`
-- `/api/health` risponde correttamente
-- la dashboard non mostra errori bloccanti
-- `/config` legge il file YAML reale
-- un salvataggio crea un backup
-- `/logs` mostra output di backend e Piper
-- `/devices` mostra la vista runtime
+Installation is successful if:
+
+- UI reachable at `http://<SERVER_IP>:<ADMIN_UI_PORT>`
+- `/api/health` responds correctly
+- dashboard shows no blocking errors
+- config reads and writes YAML
+- backups are created
+- logs are visible
+- devices page loads
 
 ---
 
-## 12. Troubleshooting base
+## 12. Troubleshooting
 
 `No module named 'app'`
-- stai lanciando `uvicorn` fuori dalla root del progetto
+- running uvicorn outside project root
 
-`Permission denied` sul file config
-- l'utente della UI non può scrivere `XIAOZHI_CONFIG`
+`Permission denied` on config file
+- UI user cannot write `XIAOZHI_CONFIG`
 
-Health errata:
-- controlla `BACKEND_HOST`
-- controlla `BACKEND_HEALTH_PORT`
+Wrong health status:
+- check BACKEND_HOST
+- check BACKEND_HEALTH_PORT
 
-Azioni non funzionano:
-- controlla `XIAOZHI_DIR`
-- controlla script path
+Actions not working:
+- check XIAOZHI_DIR
+- check script paths
 
-Systemd non funziona:
-- controlla `WorkingDirectory`
-- controlla `EnvironmentFile`
-- usa `journalctl`
+Systemd issues:
+- check WorkingDirectory
+- check EnvironmentFile
+- use journalctl
 
 ---
 
-## 13. Limiti attuali
+## 13. Current limitations
 
-- la UI è pensata per stare sullo stesso host del backend
-- nessuna autenticazione applicativa
-- richiede accesso locale a repo e config
+- designed to run on same host as backend
+- no built-in authentication
+- requires local access to backend repo and config
