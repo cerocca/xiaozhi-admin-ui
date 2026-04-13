@@ -25,3 +25,4 @@ data/backups/config/*
 #file miei di progetto
 ARCHITECTURE.md
 PROJECT_RULES.md
+docs_local/
