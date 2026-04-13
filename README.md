@@ -47,8 +47,11 @@ For full installation and step-by-step guide see [`SETUP.md`](SETUP.md).
 
 ## Requirements
 
-- A working Xiaozhi-compatible backend  
-  (e.g. https://github.com/cerocca/xiaozhi-esp32-lightserver or https://github.com/xinnan-tech/xiaozhi-esp32-server)
+- A working Xiaozhi-compatible backend
+
+Examples:
+- [xiaozhi-esp32-lightserver](https://github.com/cerocca/xiaozhi-esp32-lightserver)
+- [xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server)
 
 - Local access to:
   - backend repository  
