@@ -6,6 +6,7 @@
 ![Health](https://img.shields.io/badge/runtime-health%20API-blue)
 ![Device](https://img.shields.io/badge/device-ESP32--S3-lightgrey)
 ![Scope](https://img.shields.io/badge/scope-LAN--only-orange)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Minimal Admin UI to manage and observe a Xiaozhi ESP32 server in a LAN environment.  
 For full installation and step-by-step guide see [`SETUP.md`](SETUP.md).
