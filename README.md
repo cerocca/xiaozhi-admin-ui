@@ -1,5 +1,11 @@
 # Xiaozhi Admin UI
 
+> This repository has been superseded by the monorepo:
+> [cerocca/xiaozhi-esp32-lightserver/admin-ui](https://github.com/cerocca/xiaozhi-esp32-lightserver/tree/main/admin-ui)
+>
+> Active development continues there.
+> This repository is kept for historical reference only.
+
 ![Status](https://img.shields.io/badge/status-stable-green)
 ![UI](https://img.shields.io/badge/UI-server--rendered-lightgrey)
 ![Backend](https://img.shields.io/badge/backend-xiaozhi-blue)
